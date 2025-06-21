@@ -77,6 +77,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           id,
           name,
           role,
+          family_id,
           birth_date,
           age,
           created_at,
@@ -97,6 +98,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           name: data.name,
           email: supabaseUser?.email || '',
           role: data.role as 'PARENT' | 'CHILD',
+          familyId: data.family_id,
           birthDate: data.birth_date ? new Date(data.birth_date) : undefined,
           age: data.age,
           createdAt: new Date(data.created_at)

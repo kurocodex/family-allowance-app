@@ -3,6 +3,7 @@ export interface User {
   name: string;
   email: string;
   role: 'PARENT' | 'CHILD';
+  familyId?: string; // 家族ID
   age?: number; // 後方互換性のため残す
   birthDate?: Date; // 新しい生年月日フィールド
   createdAt: Date;

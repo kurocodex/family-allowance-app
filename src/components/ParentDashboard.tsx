@@ -7,6 +7,7 @@ import EventManagement from './EventManagement';
 import Statistics from './Statistics';
 import RateManagement from './RateManagement';
 import PointExchange from './PointExchange';
+import FamilyManagement from './FamilyManagement';
 
 const ParentDashboard: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -14,7 +15,7 @@ const ParentDashboard: React.FC = () => {
   const [children, setChildren] = useState<User[]>([]);
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [selectedChildId, setSelectedChildId] = useState<string>('');
-  const [currentTab, setCurrentTab] = useState<'tasks' | 'events' | 'statistics' | 'rates' | 'exchange'>('tasks');
+  const [currentTab, setCurrentTab] = useState<'tasks' | 'events' | 'statistics' | 'rates' | 'exchange' | 'family'>('tasks');
 
   useEffect(() => {
     loadData();
@@ -221,6 +222,17 @@ const ParentDashboard: React.FC = () => {
           <Coins className="w-5 h-5" />
           💰 ポイント交換
         </button>
+        <button
+          onClick={() => setCurrentTab('family')}
+          className={`px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 ${
+            currentTab === 'family'
+              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          <Users className="w-5 h-5" />
+          👨‍👩‍👧‍👦 家族管理
+        </button>
       </div>
 
       {/* タブ内容 */}
@@ -232,6 +244,8 @@ const ParentDashboard: React.FC = () => {
         <RateManagement />
       ) : currentTab === 'exchange' ? (
         <PointExchange />
+      ) : currentTab === 'family' ? (
+        <FamilyManagement />
       ) : (
         <>
           {/* お子様の状況と承認待ち */}
