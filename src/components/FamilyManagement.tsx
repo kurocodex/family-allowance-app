@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '../utils/supabase';
 import { useAuth } from '../hooks/useAuth';
-import { UserPlus, Users, Mail, Key, Trash2, Child, Crown } from 'lucide-react';
+import { UserPlus, Users, Mail, Key, Trash2, Crown, User as UserIcon } from 'lucide-react';
 
 const FamilyManagement: React.FC = () => {
   const { user } = useAuth();
@@ -183,7 +183,7 @@ const FamilyManagement: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="text-3xl">
-                    {member.role === 'PARENT' ? <Crown className="w-8 h-8 text-yellow-500" /> : <Child className="w-8 h-8 text-blue-500" />}
+                    {member.role === 'PARENT' ? <Crown className="w-8 h-8 text-yellow-500" /> : <UserIcon className="w-8 h-8 text-blue-500" />}
                   </div>
                   <div>
                     <h4 className="font-bold text-gray-800">{member.name}</h4>
