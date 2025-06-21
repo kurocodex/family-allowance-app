@@ -35,27 +35,20 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ onClose }) => {
     setSuccess(null);
 
     try {
-      // Supabaseのメールアドレス変更
+      // Supabaseのメールアドレス変更リクエスト（確認メール送信）
       const { error: emailError } = await supabase.auth.updateUser({
         email: formData.email
       });
 
       if (emailError) throw emailError;
 
-      // データベースのユーザー情報も更新
-      const { error: dbError } = await supabase
-        .from('users')
-        .update({ email: formData.email })
-        .eq('id', user?.id);
-
-      if (dbError) throw dbError;
-
-      setSuccess('メールアドレスの変更確認メールを送信しました。新しいメールアドレスで確認してください。');
+      // ⚠️ データベースの更新はメール確認完了まで待つ
+      // 確認完了はauth state listenerで処理される
       
-      // ローカルユーザー情報を更新
-      if (updateUser) {
-        updateUser({ ...user!, email: formData.email });
-      }
+      setSuccess(`新しいメールアドレス（${formData.email}）に確認メールを送信しました。メール内のリンクをクリックして変更を完了してください。現在のメールアドレスは変更されていません。`);
+      
+      // フォームをリセット
+      setFormData({ ...formData, email: user?.email || '' });
 
     } catch (err: any) {
       console.error('メールアドレス更新エラー:', err);

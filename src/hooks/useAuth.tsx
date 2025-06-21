@@ -35,6 +35,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         if (session?.user) {
           setSupabaseUser(session.user);
+          
+          // メール確認完了時にデータベースを更新
+          if (event === 'USER_UPDATED' && session.user.email && user?.email !== session.user.email) {
+            console.log('Email confirmed, updating database:', session.user.email);
+            try {
+              const { error } = await supabase
+                .from('users')
+                .update({ email: session.user.email })
+                .eq('id', session.user.id);
+              
+              if (error) {
+                console.error('Error updating email in database:', error);
+              } else {
+                console.log('Email updated in database successfully');
+              }
+            } catch (err) {
+              console.error('Error updating email in database:', err);
+            }
+          }
+          
           // Supabaseユーザーに対応するアプリユーザー情報を取得
           await fetchUserProfile(session.user.id);
         } else {
