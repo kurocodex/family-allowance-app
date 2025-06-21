@@ -1,7 +1,8 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, Settings } from 'lucide-react';
 import NotificationCenter from './NotificationCenter';
+import AccountSettings from './AccountSettings';
 
 // レイジーローディングでダッシュボードを分割
 const ParentDashboard = React.lazy(() => import('./ParentDashboard'));
@@ -9,6 +10,7 @@ const ChildDashboard = React.lazy(() => import('./ChildDashboard'));
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
+  const [showAccountSettings, setShowAccountSettings] = useState(false);
 
   if (!user) {
     return null;
@@ -36,11 +38,19 @@ const Dashboard: React.FC = () => {
             <div className="flex items-center gap-2">
               <NotificationCenter />
               <button
+                onClick={() => setShowAccountSettings(true)}
+                className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                title="アカウント設定"
+              >
+                <Settings className="w-4 h-4" />
+                <span className="hidden md:inline">設定</span>
+              </button>
+              <button
                 onClick={logout}
                 className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
               >
                 <LogOut className="w-4 h-4" />
-                ログアウト
+                <span className="hidden md:inline">ログアウト</span>
               </button>
             </div>
           </div>

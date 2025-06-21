@@ -9,6 +9,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   register: (email: string, password: string, name: string, role: 'PARENT' | 'CHILD') => Promise<void>;
+  updateUser: (userData: Partial<User>) => void;
   loading: boolean;
 }
 
@@ -92,11 +93,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       if (data) {
+        // 現在のSupabaseユーザーのメールアドレスを取得
+        const { data: currentUser } = await supabase.auth.getUser();
+        
         // Supabaseのデータを既存のUser型に変換
         const userProfile: User = {
           id: data.id,
           name: data.name,
-          email: supabaseUser?.email || '',
+          email: currentUser?.user?.email || '',
           role: data.role as 'PARENT' | 'CHILD',
           familyId: data.family_id,
           birthDate: data.birth_date ? new Date(data.birth_date) : undefined,
@@ -196,6 +200,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const updateUser = (userData: Partial<User>) => {
+    if (user) {
+      setUser({ ...user, ...userData });
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -203,6 +213,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       login, 
       logout, 
       register, 
+      updateUser,
       loading 
     }}>
       {children}
