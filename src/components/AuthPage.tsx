@@ -180,16 +180,6 @@ const AuthPage: React.FC = () => {
           </button>
         </div>
 
-        {isLogin && (
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-bold text-blue-800 mb-2">デモ用アカウント</h3>
-            <p className="text-xs text-blue-600 mb-2">開発中のため、以下のアカウントでテストできます：</p>
-            <div className="text-xs text-blue-700 space-y-1">
-              <div>📧 test@example.com</div>
-              <div>🔑 password123</div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
