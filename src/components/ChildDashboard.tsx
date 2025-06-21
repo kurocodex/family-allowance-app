@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Task, TaskCompletion, Event } from '../types';
 import { database } from '../utils/database';
 import { useAuth } from '../hooks/useAuth';
 import { CheckCircle, Clock, Star, Award, Send, Calendar, BarChart3 } from 'lucide-react';
-import EventManagement from './EventManagement';
+
+// レイジーローディング
+const EventManagement = React.lazy(() => import('./EventManagement'));
 
 const ChildDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -191,7 +193,9 @@ const ChildDashboard: React.FC = () => {
 
       {/* タブ内容 */}
       {currentTab === 'events' ? (
-        <EventManagement />
+        <Suspense fallback={<div className="text-center py-8">イベントを読み込み中...</div>}>
+          <EventManagement />
+        </Suspense>
       ) : currentTab === 'stats' ? (
         <ChildStatsView 
           user={user}

@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Task, TaskCompletion, PointTransaction, User } from '../types';
 import { database } from '../utils/database';
 import { useAuth } from '../hooks/useAuth';
 import { calculateAge } from '../utils/dateUtils';
 import { Plus, CheckCircle, XCircle, Clock, Users, Award, Trash2, Calendar, BarChart3, Settings, Coins } from 'lucide-react';
-import EventManagement from './EventManagement';
-import Statistics from './Statistics';
-import RateManagement from './RateManagement';
-import PointExchange from './PointExchange';
-import FamilyManagement from './FamilyManagement';
+
+// 重いコンポーネントをレイジーロード
+const EventManagement = React.lazy(() => import('./EventManagement'));
+const Statistics = React.lazy(() => import('./Statistics'));
+const RateManagement = React.lazy(() => import('./RateManagement'));
+const PointExchange = React.lazy(() => import('./PointExchange'));
+const FamilyManagement = React.lazy(() => import('./FamilyManagement'));
 
 const ParentDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -302,17 +304,25 @@ const ParentDashboard: React.FC = () => {
 
       {/* タブ内容 */}
       {currentTab === 'events' ? (
-        <EventManagement />
+        <Suspense fallback={<div className="text-center py-8">イベント管理を読み込み中...</div>}>
+          <EventManagement />
+        </Suspense>
       ) : currentTab === 'statistics' ? (
-        <Statistics />
+        <Suspense fallback={<div className="text-center py-8">統計データを読み込み中...</div>}>
+          <Statistics />
+        </Suspense>
       ) : currentTab === 'rates' ? (
-        <RateManagement />
+        <Suspense fallback={<div className="text-center py-8">レート設定を読み込み中...</div>}>
+          <RateManagement />
+        </Suspense>
       ) : currentTab === 'exchange' ? (
-        <PointExchange />
+        <Suspense fallback={<div className="text-center py-8">ポイント交換を読み込み中...</div>}>
+          <PointExchange />
+        </Suspense>
       ) : currentTab === 'family' ? (
-        <React.Suspense fallback={<div className="text-center py-8">家族管理を読み込み中...</div>}>
+        <Suspense fallback={<div className="text-center py-8">家族管理を読み込み中...</div>}>
           <FamilyManagement />
-        </React.Suspense>
+        </Suspense>
       ) : (
         <>
           {/* お子様の状況と承認待ち */}

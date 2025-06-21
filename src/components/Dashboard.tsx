@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import ParentDashboard from './ParentDashboard';
-import ChildDashboard from './ChildDashboard';
 import { LogOut, User } from 'lucide-react';
+
+// レイジーローディングでダッシュボードを分割
+const ParentDashboard = React.lazy(() => import('./ParentDashboard'));
+const ChildDashboard = React.lazy(() => import('./ChildDashboard'));
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -42,7 +44,16 @@ const Dashboard: React.FC = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {user.role === 'PARENT' ? <ParentDashboard /> : <ChildDashboard />}
+        <Suspense fallback={
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mx-auto mb-4"></div>
+              <p className="text-purple-600 text-lg font-medium">ダッシュボードを読み込み中...</p>
+            </div>
+          </div>
+        }>
+          {user.role === 'PARENT' ? <ParentDashboard /> : <ChildDashboard />}
+        </Suspense>
       </main>
     </div>
   );
