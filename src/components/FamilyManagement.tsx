@@ -79,11 +79,10 @@ const FamilyManagement: React.FC = () => {
       const tempPassword = `child${Math.random().toString(36).substring(2, 6)}`;
       const tempEmail = `${childData.name.toLowerCase()}.${user.familyId}@temp.local`;
 
-      // Supabase Authでユーザー作成
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      // 通常のユーザー登録を使用
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: tempEmail,
         password: tempPassword,
-        email_confirm: true, // メール確認をスキップ
       });
 
       if (authError) throw authError;
@@ -110,7 +109,9 @@ const FamilyManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Error creating child account:', error);
-      alert('子供アカウントの作成に失敗しました');
+      // 詳細なエラー情報を表示
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`子供アカウントの作成に失敗しました:\n${errorMessage}`);
     }
   };
 
@@ -118,9 +119,12 @@ const FamilyManagement: React.FC = () => {
     if (!confirm('このメンバーを削除してもよろしいですか？\n※データも全て削除されます')) return;
 
     try {
-      // Supabase Authからユーザー削除
-      const { error: authError } = await supabase.auth.admin.deleteUser(memberId);
-      if (authError) throw authError;
+      // ユーザープロフィールを削除（Authユーザーは自動削除される）
+      const { error: deleteError } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', memberId);
+      if (deleteError) throw deleteError;
 
       // プロフィールも自動削除される（CASCADE設定のため）
       await loadFamilyMembers();
