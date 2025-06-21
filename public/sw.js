@@ -1,5 +1,5 @@
 // Service Worker for PWA functionality - CSP準拠
-const CACHE_NAME = `family-app-v3-${Date.now()}`;
+const CACHE_NAME = 'family-app-v3';
 const urlsToCache = [
   '/',
   '/manifest.json'
