@@ -330,4 +330,205 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 - **Error handling**: Graceful degradation with user feedback
 - **Performance**: Lazy loading and code splitting where appropriate
 
+## 🚨 Claude Code Development Best Practices & Common Pitfalls
+
+### ⚠️ Next.js App Router Specific Issues (Future Reference)
+
+#### 1. **Route Groups vs Nested Routing**
+```typescript
+❌ WRONG: Treating (admin) as nested routing
+app/
+  (admin)/page.tsx  // This conflicts with app/page.tsx!
+  page.tsx
+
+✅ CORRECT: Route groups for organization only
+app/
+  (admin)/
+    dashboard/page.tsx
+    users/page.tsx
+  page.tsx
+```
+
+#### 2. **Data Fetching: Server Components First**
+```typescript
+❌ WRONG: useEffect in every component
+function Component() {
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    fetchData().then(setData);
+  }, []);
+}
+
+✅ CORRECT: Server Component with Data Access Layer
+// lib/dal.ts - Data Access Layer
+export async function getUserData(id: string) {
+  const data = await db.user.findUnique({ where: { id } });
+  return data;
+}
+
+// app/users/[id]/page.tsx - Server Component
+async function UserPage({ params }: { params: { id: string } }) {
+  const user = await getUserData(params.id);
+  return <UserProfile user={user} />;
+}
+```
+
+#### 3. **Streaming Data Fetching with Suspense**
+```typescript
+❌ WRONG: Single loading state for entire page
+function Page() {
+  const [loading, setLoading] = useState(true);
+  // ... fetch all data at once
+}
+
+✅ CORRECT: Streaming with Suspense boundaries
+function Page() {
+  return (
+    <div>
+      <Suspense fallback={<HeaderSkeleton />}>
+        <Header />
+      </Suspense>
+      <Suspense fallback={<ContentSkeleton />}>
+        <Content />
+      </Suspense>
+    </div>
+  );
+}
+```
+
+#### 4. **Server Actions vs Client Event Handlers**
+```typescript
+❌ WRONG: Client-side form handling by default
+function Form() {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await fetch('/api/submit', { method: 'POST', ... });
+  };
+}
+
+✅ CORRECT: Server Actions first
+// app/actions.ts
+'use server'
+export async function submitForm(formData: FormData) {
+  // Server-side form processing
+  const data = Object.fromEntries(formData);
+  await db.create(data);
+  revalidatePath('/dashboard');
+}
+
+// Component
+function Form() {
+  return <form action={submitForm}>...</form>;
+}
+```
+
+#### 5. **Async Params and SearchParams**
+```typescript
+❌ WRONG: Synchronous params access
+function Page({ params, searchParams }: {
+  params: { id: string };
+  searchParams: { tab: string };
+}) {
+  // This will error in newer Next.js versions
+}
+
+✅ CORRECT: Async params access
+async function Page({ 
+  params, 
+  searchParams 
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ tab: string }>;
+}) {
+  const { id } = await params;
+  const { tab } = await searchParams;
+}
+```
+
+#### 6. **Supabase Client vs Server Client**
+```typescript
+❌ WRONG: Using client everywhere
+import { createClient } from '@supabase/supabase-js';
+const supabase = createClient(url, key); // Wrong for server-side
+
+✅ CORRECT: Context-appropriate clients
+// Client Component
+import { createClient } from '@supabase/supabase-js';
+const supabase = createClient(url, key);
+
+// Server Component/Action
+import { createServerClient } from '@supabase/ssr';
+const supabase = createServerClient(url, key, {
+  cookies: () => cookieStore
+});
+```
+
+### 🔧 Current Project (Vite + React) Improvements Applied
+
+#### **1. Reduced useEffect Usage**
+- ✅ Authentication state managed through context, not multiple useEffects
+- ✅ Data fetching centralized in custom hooks
+- ✅ Event-driven updates instead of polling with useEffect
+
+#### **2. Enhanced Loading States with Suspense**
+```typescript
+// Already implemented in ParentDashboard.tsx
+const EventManagement = React.lazy(() => import('./EventManagement'));
+const Statistics = React.lazy(() => import('./Statistics'));
+
+<Suspense fallback={<ComponentSkeleton />}>
+  <EventManagement />
+</Suspense>
+```
+
+#### **3. Optimized Data Fetching**
+- ✅ Custom hooks for data management (`useAuth`, `useNotifications`)
+- ✅ Centralized database operations in `utils/database.ts`
+- ✅ Error boundaries for graceful failure handling
+
+#### **4. Performance Optimizations**
+- ✅ Lazy loading of heavy components
+- ✅ Chunk splitting for optimal bundle sizes
+- ✅ Code splitting with React.lazy()
+- ✅ Memoization where appropriate
+
+#### **5. Current Architecture Benefits**
+```
+✅ Type-safe with TypeScript throughout
+✅ Centralized state management via Context
+✅ Component isolation with clear boundaries
+✅ Error handling with ErrorBoundary
+✅ Progressive loading with Suspense
+✅ Optimized build output with Vite
+```
+
+### 📋 Development Checklist for Future Projects
+
+#### **Next.js App Router Projects**
+- [ ] Use Server Components for data fetching by default
+- [ ] Implement Server Actions for form submissions
+- [ ] Use Suspense boundaries for streaming
+- [ ] Async/await for params and searchParams
+- [ ] createServerClient for server-side Supabase operations
+- [ ] Route groups for organization, not routing
+- [ ] Data Access Layer (DAL) for reusable queries
+
+#### **React Projects (General)**
+- [ ] Minimize useEffect usage
+- [ ] Implement Error Boundaries
+- [ ] Use Suspense for loading states
+- [ ] Custom hooks for stateful logic
+- [ ] Type-safe with TypeScript
+- [ ] Component lazy loading for large apps
+- [ ] Centralized error handling
+
+### 🎯 Key Takeaways
+
+1. **Server-First Approach** (Next.js): Prefer server components and server actions
+2. **Streaming UX**: Use Suspense for better perceived performance
+3. **Type Safety**: TypeScript throughout the entire stack
+4. **Error Resilience**: Proper error boundaries and handling
+5. **Performance**: Lazy loading and code splitting as standard practice
+6. **Architecture**: Clean separation of concerns with proper abstractions
+
 This application represents a production-ready family allowance management system with comprehensive features for both parents and children, built with modern web technologies and best practices.

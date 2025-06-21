@@ -1,7 +1,8 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Task, TaskCompletion, Event } from '../types';
 import { database } from '../utils/database';
 import { useAuth } from '../hooks/useAuth';
+import { useChildData } from '../hooks/useChildData';
 import { CheckCircle, Clock, Star, Award, Send, Calendar, BarChart3 } from 'lucide-react';
 
 // レイジーローディング
@@ -9,50 +10,10 @@ const EventManagement = React.lazy(() => import('./EventManagement'));
 
 const ChildDashboard: React.FC = () => {
   const { user } = useAuth();
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [myCompletions, setMyCompletions] = useState<TaskCompletion[]>([]);
-  const [myPoints, setMyPoints] = useState(0);
+  const { tasks, myCompletions, myPoints, loading, error, refreshData } = useChildData(user);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [currentTab, setCurrentTab] = useState<'tasks' | 'events' | 'stats'>('tasks');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (user?.familyId) {
-      loadData();
-    }
-  }, [user?.familyId]);
-
-  const loadData = async () => {
-    if (!user?.familyId) return;
-    
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Supabaseからデータを取得
-      const [tasksData, completionsData, transactionsData] = await Promise.all([
-        database.getTasks(user.familyId),
-        database.getTaskCompletions(user.familyId),
-        database.getPointTransactions(user.familyId)
-      ]);
-      
-      setTasks(tasksData);
-      setMyCompletions(completionsData.filter(c => c.childId === user.id));
-      
-      // ポイント計算
-      const myTransactions = transactionsData.filter(t => t.userId === user.id);
-      const earnedPoints = myTransactions.filter(t => t.type === 'EARNED').reduce((sum, t) => sum + t.amount, 0);
-      const spentPoints = myTransactions.filter(t => t.type === 'EXCHANGED').reduce((sum, t) => sum + t.amount, 0);
-      const currentBalance = earnedPoints - spentPoints;
-      setMyPoints(currentBalance);
-    } catch (err) {
-      console.error('データ読み込みエラー:', err);
-      setError('データベースの初期設定が必要です。Supabaseでdatabase-schema.sqlを実行してください。');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleTaskSubmit = async (taskId: string, comments: string) => {
     if (!user?.familyId) return;
@@ -66,7 +27,7 @@ const ChildDashboard: React.FC = () => {
         comments
       }, user.familyId);
       
-      await loadData();
+      await refreshData();
       setSelectedTask(null);
     } catch (err) {
       console.error('タスク提出エラー:', err);
@@ -131,7 +92,7 @@ const ChildDashboard: React.FC = () => {
       <div className="text-center py-8">
         <p className="text-red-600 text-lg mb-4">{error}</p>
         <button
-          onClick={loadData}
+          onClick={refreshData}
           className="btn-primary"
         >
           再読み込み
