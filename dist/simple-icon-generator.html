@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>アイコン生成</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background: linear-gradient(135deg, #8B5CF6, #EC4899);
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 20px;
+        }
+        canvas { 
+            border: 2px solid white; 
+            border-radius: 10px; 
+            margin: 10px; 
+        }
+        button {
+            background: #F59E0B;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #FACC15; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 PWAアイコン生成</h1>
+        <canvas id="canvas" width="512" height="512"></canvas><br>
+        <button onclick="generateIcon()">アイコン生成</button>
+        <button onclick="downloadIcon(512, 'pwa-512x512.png')">512x512</button>
+        <button onclick="downloadIcon(192, 'pwa-192x192.png')">192x192</button>
+        <button onclick="downloadIcon(180, 'apple-touch-icon-180x180.png')">180x180 (iOS)</button>
+        <button onclick="downloadIcon(64, 'pwa-64x64.png')">64x64</button>
+        <button onclick="downloadIcon(32, 'favicon-32x32.png')">32x32</button>
+        <button onclick="downloadIcon(16, 'favicon-16x16.png')">16x16</button>
+    </div>
+
+    <script>
+        function generateIcon() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, 512, 512);
+            gradient.addColorStop(0, '#8B5CF6');
+            gradient.addColorStop(0.5, '#A855F7');
+            gradient.addColorStop(1, '#EC4899');
+            
+            // Draw rounded background
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.roundRect(0, 0, 512, 512, 96);
+            ctx.fill();
+            
+            // Main coin
+            const coinGradient = ctx.createLinearGradient(136, 100, 376, 340);
+            coinGradient.addColorStop(0, '#FDE047');
+            coinGradient.addColorStop(1, '#FACC15');
+            
+            ctx.fillStyle = coinGradient;
+            ctx.beginPath();
+            ctx.arc(256, 220, 120, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Coin border
+            ctx.strokeStyle = '#F59E0B';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(256, 220, 100, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Yen symbol
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            // Y shape
+            ctx.beginPath();
+            ctx.moveTo(226, 180);
+            ctx.lineTo(256, 210);
+            ctx.lineTo(286, 180);
+            ctx.stroke();
+            
+            // Vertical line
+            ctx.beginPath();
+            ctx.moveTo(256, 210);
+            ctx.lineTo(256, 260);
+            ctx.stroke();
+            
+            // Horizontal lines
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(231, 225);
+            ctx.lineTo(281, 225);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(231, 240);
+            ctx.lineTo(281, 240);
+            ctx.stroke();
+            
+            // Floating coins
+            drawSmallCoin(140, 120, 25);
+            drawSmallCoin(370, 160, 30);
+            drawSmallCoin(100, 300, 20);
+            
+            // Family figures
+            drawFamily();
+            
+            // Sparkles
+            drawSparkles();
+            
+            function drawSmallCoin(x, y, radius) {
+                ctx.fillStyle = coinGradient;
+                ctx.globalAlpha = 0.8;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.fillStyle = 'white';
+                ctx.font = `bold ${radius * 0.8}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('¥', x, y + 2);
+                ctx.globalAlpha = 1;
+            }
+            
+            function drawFamily() {
+                ctx.fillStyle = 'white';
+                ctx.globalAlpha = 0.9;
+                
+                // Parent
+                ctx.beginPath();
+                ctx.arc(216, 380, 15, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.roundRect(206, 395, 20, 30, 10);
+                ctx.fill();
+                
+                ctx.globalAlpha = 0.8;
+                
+                // Child 1
+                ctx.beginPath();
+                ctx.arc(256, 385, 12, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.roundRect(246, 397, 20, 25, 10);
+                ctx.fill();
+                
+                // Child 2
+                ctx.beginPath();
+                ctx.arc(296, 385, 12, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.roundRect(286, 397, 20, 25, 10);
+                ctx.fill();
+                
+                ctx.globalAlpha = 1;
+            }
+            
+            function drawSparkles() {
+                ctx.fillStyle = 'white';
+                ctx.globalAlpha = 0.6;
+                
+                const sparkles = [
+                    [180, 80], [320, 100], [80, 250], [420, 280]
+                ];
+                
+                sparkles.forEach(([x, y]) => {
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + 5, y + 10);
+                    ctx.lineTo(x + 15, y + 5);
+                    ctx.lineTo(x + 5, y + 15);
+                    ctx.closePath();
+                    ctx.fill();
+                });
+                
+                ctx.globalAlpha = 1;
+            }
+        }
+        
+        function downloadIcon(size, filename) {
+            const canvas = document.getElementById('canvas');
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            tempCanvas.width = size;
+            tempCanvas.height = size;
+            
+            tempCtx.drawImage(canvas, 0, 0, size, size);
+            
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = tempCanvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // Auto-generate on load
+        window.onload = generateIcon;
+    </script>
+</body>
+</html>

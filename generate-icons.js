@@ -1,0 +1,55 @@
+// Node.js script to generate PNG icons from SVG
+// Run with: node generate-icons.js
+
+const fs = require('fs');
+const { createCanvas, loadImage } = require('canvas');
+
+const svgContent = `
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#A855F7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EC4899;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="coinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FDE047;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FACC15;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="4" dy="8" stdDeviation="8" flood-color="#000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="96" ry="96" fill="url(#bgGradient)"/>
+  <circle cx="256" cy="220" r="120" fill="url(#coinGradient)" filter="url(#shadow)"/>
+  <circle cx="256" cy="220" r="100" fill="none" stroke="#F59E0B" stroke-width="4"/>
+  <g transform="translate(256, 220)">
+    <path d="M-30 -40 L0 -10 L30 -40" stroke="white" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="0" y1="-10" x2="0" y2="40" stroke="white" stroke-width="8" stroke-linecap="round"/>
+    <line x1="-25" y1="5" x2="25" y2="5" stroke="white" stroke-width="6" stroke-linecap="round"/>
+    <line x1="-25" y1="20" x2="25" y2="20" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <circle cx="140" cy="120" r="25" fill="url(#coinGradient)" opacity="0.8"/>
+  <text x="140" y="130" text-anchor="middle" fill="white" font-family="Arial" font-size="20" font-weight="bold">¥</text>
+  <circle cx="370" cy="160" r="30" fill="url(#coinGradient)" opacity="0.9"/>
+  <text x="370" y="172" text-anchor="middle" fill="white" font-family="Arial" font-size="24" font-weight="bold">¥</text>
+  <circle cx="100" cy="300" r="20" fill="url(#coinGradient)" opacity="0.7"/>
+  <text x="100" y="308" text-anchor="middle" fill="white" font-family="Arial" font-size="16" font-weight="bold">¥</text>
+  <g transform="translate(256, 400)">
+    <circle cx="-40" cy="-20" r="15" fill="white" opacity="0.9"/>
+    <rect x="-50" y="-5" width="20" height="30" rx="10" fill="white" opacity="0.9"/>
+    <circle cx="0" cy="-15" r="12" fill="white" opacity="0.8"/>
+    <rect x="-10" y="-3" width="20" height="25" rx="10" fill="white" opacity="0.8"/>
+    <circle cx="40" cy="-15" r="12" fill="white" opacity="0.8"/>
+    <rect x="30" y="-3" width="20" height="25" rx="10" fill="white" opacity="0.8"/>
+  </g>
+  <g fill="white" opacity="0.6">
+    <path d="M180 80 L185 90 L195 85 L185 95 Z"/>
+    <path d="M320 100 L325 110 L335 105 L325 115 Z"/>
+    <path d="M80 250 L85 260 L95 255 L85 265 Z"/>
+    <path d="M420 280 L425 290 L435 285 L425 295 Z"/>
+  </g>
+</svg>`;
+
+console.log('SVG icon created! You can use the HTML generator to create PNG versions.');
+console.log('Open public/icon-generator.html in your browser to generate all icon sizes.');
