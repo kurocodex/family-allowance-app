@@ -1,0 +1,2 @@
+Force cache clear - timestamp: 2025-01-01T00:00:00Z
+This file forces Vercel to invalidate all caches and redeploy completely.

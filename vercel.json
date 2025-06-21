@@ -11,7 +11,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://adtsbzzizbwjiqrkqofp.supabase.co; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://adtsbzzizbwjiqrkqofp.supabase.co wss://adtsbzzizbwjiqrkqofp.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://adtsbzzizbwjiqrkqofp.supabase.co https://vercel.live; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://adtsbzzizbwjiqrkqofp.supabase.co wss://adtsbzzizbwjiqrkqofp.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';"
         }
       ]
     },
@@ -29,7 +29,15 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+          "value": "no-cache, no-store, must-revalidate"
+        },
+        {
+          "key": "Pragma",
+          "value": "no-cache"
+        },
+        {
+          "key": "Expires",
+          "value": "0"
         }
       ]
     }

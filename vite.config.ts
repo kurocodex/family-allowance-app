@@ -13,9 +13,13 @@ export default defineConfig({
     // CSP対応: evalを使用しないソースマップ生成
     sourcemap: false,
     minify: 'terser',
-    // チャンクサイズの最適化
+    // チャンクサイズの最適化 + キャッシュ無効化
     rollupOptions: {
       output: {
+        // キャッシュ無効化のため新しいハッシュを含める
+        entryFileNames: `assets/[name]-[hash]-${Date.now()}.js`,
+        chunkFileNames: `assets/[name]-[hash]-${Date.now()}.js`,
+        assetFileNames: `assets/[name]-[hash]-${Date.now()}.[ext]`,
         manualChunks: {
           // ベンダーライブラリを分離
           vendor: ['react', 'react-dom'],
