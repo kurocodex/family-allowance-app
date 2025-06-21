@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PWA Icon Generator</title>
+</head>
+<body>
+    <canvas id="canvas" width="512" height="512"></canvas>
+    <script>
+        // Simple icon generator for PWA
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Background gradient
+        const gradient = ctx.createLinearGradient(0, 0, 512, 512);
+        gradient.addColorStop(0, '#8B5CF6');
+        gradient.addColorStop(1, '#EC4899');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 512, 512);
+        
+        // Add rounded corners
+        ctx.globalCompositeOperation = 'destination-in';
+        ctx.beginPath();
+        ctx.roundRect(0, 0, 512, 512, 64);
+        ctx.fill();
+        
+        // Reset composite operation
+        ctx.globalCompositeOperation = 'source-over';
+        
+        // Add emoji/text
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 200px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('💰', 256, 256);
+        
+        // Download different sizes
+        function downloadIcon(size, filename) {
+            const smallCanvas = document.createElement('canvas');
+            smallCanvas.width = size;
+            smallCanvas.height = size;
+            const smallCtx = smallCanvas.getContext('2d');
+            smallCtx.drawImage(canvas, 0, 0, size, size);
+            
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = smallCanvas.toDataURL();
+            link.click();
+        }
+        
+        // Generate icons
+        setTimeout(() => {
+            downloadIcon(64, 'pwa-64x64.png');
+            downloadIcon(192, 'pwa-192x192.png');
+            downloadIcon(512, 'pwa-512x512.png');
+            downloadIcon(180, 'apple-touch-icon-180x180.png');
+        }, 1000);
+    </script>
+</body>
+</html>

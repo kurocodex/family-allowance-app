@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { LogOut, User } from 'lucide-react';
+import NotificationCenter from './NotificationCenter';
 
 // レイジーローディングでダッシュボードを分割
 const ParentDashboard = React.lazy(() => import('./ParentDashboard'));
@@ -32,13 +33,16 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
             
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              ログアウト
-            </button>
+            <div className="flex items-center gap-2">
+              <NotificationCenter />
+              <button
+                onClick={logout}
+                className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                ログアウト
+              </button>
+            </div>
           </div>
         </div>
       </header>

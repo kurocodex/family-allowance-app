@@ -1,10 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AuthProvider, useAuth } from './hooks/useAuth';
+import { NotificationProvider } from './hooks/useNotifications';
 import AuthPage from './components/AuthPage';
 import Dashboard from './components/Dashboard';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
+import { registerServiceWorker, requestNotificationPermission } from './utils/pwa';
 
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
+
+  useEffect(() => {
+    // Register service worker for PWA functionality
+    registerServiceWorker();
+    
+    // Request notification permission when user logs in
+    if (user) {
+      requestNotificationPermission();
+    }
+  }, [user]);
 
   if (loading) {
     return (
@@ -17,7 +30,18 @@ const AppContent: React.FC = () => {
     );
   }
 
-  return user ? <Dashboard /> : <AuthPage />;
+  return (
+    <>
+      {user ? (
+        <NotificationProvider>
+          <Dashboard />
+        </NotificationProvider>
+      ) : (
+        <AuthPage />
+      )}
+      <PWAInstallPrompt />
+    </>
+  );
 };
 
 const App: React.FC = () => {
