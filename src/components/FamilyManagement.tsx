@@ -77,7 +77,10 @@ const FamilyManagement: React.FC = () => {
 
       // 子供用の仮パスワードを生成
       const tempPassword = `child${Math.random().toString(36).substring(2, 6)}`;
-      const tempEmail = `${childData.name.toLowerCase()}.${user.familyId}@temp.local`;
+      // 有効なメール形式に変更（日本語名も対応）
+      const sanitizedName = childData.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const randomSuffix = Math.random().toString(36).substring(2, 8);
+      const tempEmail = `${sanitizedName}${randomSuffix}@example.com`;
 
       // 通常のユーザー登録を使用
       const { data: authData, error: authError } = await supabase.auth.signUp({
