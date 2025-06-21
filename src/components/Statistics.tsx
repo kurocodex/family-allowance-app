@@ -18,30 +18,27 @@ interface StatisticsData {
   completionRate: number;
 }
 
-const Statistics: React.FC = () => {
+interface StatisticsProps {
+  children: User[];
+}
+
+const Statistics: React.FC<StatisticsProps> = ({ children }) => {
   const { user } = useAuth();
   const [selectedChild, setSelectedChild] = useState<string>('');
-  const [children, setChildren] = useState<User[]>([]);
   const [statistics, setStatistics] = useState<StatisticsData | null>(null);
   const [timeRange, setTimeRange] = useState<'1month' | '3months' | '6months' | 'all'>('3months');
 
   useEffect(() => {
-    loadChildren();
-  }, []);
+    if (children.length > 0 && !selectedChild) {
+      setSelectedChild(children[0].id);
+    }
+  }, [children, selectedChild]);
 
   useEffect(() => {
     if (selectedChild) {
       calculateStatistics(selectedChild);
     }
   }, [selectedChild, timeRange]);
-
-  const loadChildren = () => {
-    const allChildren = storage.getUsers().filter(u => u.role === 'CHILD');
-    setChildren(allChildren);
-    if (allChildren.length > 0 && !selectedChild) {
-      setSelectedChild(allChildren[0].id);
-    }
-  };
 
   const calculateStatistics = (childId: string) => {
     const tasks = storage.getTasks();

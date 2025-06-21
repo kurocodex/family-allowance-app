@@ -17,9 +17,12 @@ interface PointBalance {
   totalExchanged: number; // 交換総金額
 }
 
-const PointExchange: React.FC = () => {
+interface PointExchangeProps {
+  children: User[];
+}
+
+const PointExchange: React.FC<PointExchangeProps> = ({ children }) => {
   const { user } = useAuth();
-  const [children, setChildren] = useState<User[]>([]);
   const [selectedChildId, setSelectedChildId] = useState<string>('');
   const [exchangeAmount, setExchangeAmount] = useState<number>(100);
   const [exchangeRate] = useState<ExchangeRate>({
@@ -30,20 +33,14 @@ const PointExchange: React.FC = () => {
   const [pointBalances, setPointBalances] = useState<{ [childId: string]: PointBalance }>({});
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (children.length > 0 && !selectedChildId) {
+      setSelectedChildId(children[0].id);
+    }
+  }, [children, selectedChildId]);
 
   useEffect(() => {
     calculateBalances();
   }, [children]);
-
-  const loadData = () => {
-    const allChildren = storage.getUsers().filter(u => u.role === 'CHILD');
-    setChildren(allChildren);
-    if (allChildren.length > 0 && !selectedChildId) {
-      setSelectedChildId(allChildren[0].id);
-    }
-  };
 
   const calculateBalances = () => {
     const balances: { [childId: string]: PointBalance } = {};

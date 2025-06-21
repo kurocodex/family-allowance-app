@@ -5,11 +5,14 @@ import { useAuth } from '../hooks/useAuth';
 import { calculateAge } from '../utils/dateUtils';
 import { Calendar, Trophy, Plus, Star, Clock, CheckCircle } from 'lucide-react';
 
-const EventManagement: React.FC = () => {
+interface EventManagementProps {
+  children: User[];
+}
+
+const EventManagement: React.FC<EventManagementProps> = ({ children }) => {
   const { user } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [eventResults, setEventResults] = useState<EventResult[]>([]);
-  const [children, setChildren] = useState<User[]>([]);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [selectedTab, setSelectedTab] = useState<'active' | 'completed'>('active');
 
@@ -20,7 +23,6 @@ const EventManagement: React.FC = () => {
   const loadData = () => {
     setEvents(storage.getEvents());
     setEventResults(storage.getEventResults());
-    setChildren(storage.getUsers().filter(u => u.role === 'CHILD'));
   };
 
   const activeEvents = events.filter(event => {

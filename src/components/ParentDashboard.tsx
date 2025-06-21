@@ -314,11 +314,11 @@ const ParentDashboard: React.FC = () => {
       {/* タブ内容 */}
       {currentTab === 'events' ? (
         <Suspense fallback={<div className="text-center py-8">イベント管理を読み込み中...</div>}>
-          <EventManagement />
+          <EventManagement children={children} />
         </Suspense>
       ) : currentTab === 'statistics' ? (
         <Suspense fallback={<div className="text-center py-8">統計データを読み込み中...</div>}>
-          <Statistics />
+          <Statistics children={children} />
         </Suspense>
       ) : currentTab === 'rates' ? (
         <Suspense fallback={<div className="text-center py-8">レート設定を読み込み中...</div>}>
@@ -326,7 +326,7 @@ const ParentDashboard: React.FC = () => {
         </Suspense>
       ) : currentTab === 'exchange' ? (
         <Suspense fallback={<div className="text-center py-8">ポイント交換を読み込み中...</div>}>
-          <PointExchange />
+          <PointExchange children={children} />
         </Suspense>
       ) : currentTab === 'family' ? (
         <Suspense fallback={<div className="text-center py-8">家族管理を読み込み中...</div>}>
