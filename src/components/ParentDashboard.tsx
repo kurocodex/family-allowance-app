@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Task, TaskCompletion, PointTransaction, User } from '../types';
-import { storage } from '../utils/storage';
+import { database } from '../utils/database';
+import { useAuth } from '../hooks/useAuth';
 import { calculateAge } from '../utils/dateUtils';
 import { Plus, CheckCircle, XCircle, Clock, Users, Award, Trash2, Calendar, BarChart3, Settings, Coins } from 'lucide-react';
 import EventManagement from './EventManagement';
@@ -10,52 +11,92 @@ import PointExchange from './PointExchange';
 import FamilyManagement from './FamilyManagement';
 
 const ParentDashboard: React.FC = () => {
+  const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [pendingCompletions, setPendingCompletions] = useState<TaskCompletion[]>([]);
   const [children, setChildren] = useState<User[]>([]);
+  const [childrenPoints, setChildrenPoints] = useState<{[childId: string]: number}>({});
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [selectedChildId, setSelectedChildId] = useState<string>('');
   const [currentTab, setCurrentTab] = useState<'tasks' | 'events' | 'statistics' | 'rates' | 'exchange' | 'family'>('tasks');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (user?.familyId) {
+      loadData();
+    }
+  }, [user?.familyId]);
 
-  const loadData = () => {
-    setTasks(storage.getTasks());
-    setPendingCompletions(
-      storage.getTaskCompletions().filter(completion => completion.status === 'PENDING')
-    );
-    setChildren(storage.getUsers().filter(user => user.role === 'CHILD'));
+  const loadData = async () => {
+    if (!user?.familyId) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Supabaseからデータを取得
+      const [tasksData, completionsData, usersData, transactionsData] = await Promise.all([
+        database.getTasks(user.familyId),
+        database.getTaskCompletions(user.familyId),
+        database.getUsers(user.familyId),
+        database.getPointTransactions(user.familyId)
+      ]);
+      
+      setTasks(tasksData);
+      setPendingCompletions(completionsData.filter(completion => completion.status === 'PENDING'));
+      const childrenData = usersData.filter(user => user.role === 'CHILD');
+      setChildren(childrenData);
+      
+      // 子供のポイントを計算
+      const pointsMap: {[childId: string]: number} = {};
+      childrenData.forEach(child => {
+        const childTransactions = transactionsData.filter(t => t.userId === child.id);
+        const earnedPoints = childTransactions.filter(t => t.type === 'EARNED').reduce((sum, t) => sum + t.amount, 0);
+        const spentPoints = childTransactions.filter(t => t.type === 'EXCHANGED').reduce((sum, t) => sum + t.amount, 0);
+        pointsMap[child.id] = earnedPoints - spentPoints;
+      });
+      setChildrenPoints(pointsMap);
+    } catch (err) {
+      console.error('データ読み込みエラー:', err);
+      setError('データの読み込みに失敗しました');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleApproval = (completionId: string, approved: boolean) => {
-    const completions = storage.getTaskCompletions();
-    const completion = completions.find(c => c.id === completionId);
+  const handleApproval = async (completionId: string, approved: boolean) => {
+    if (!user?.familyId) return;
     
-    if (completion) {
-      completion.status = approved ? 'APPROVED' : 'REJECTED';
-      completion.approvedAt = new Date();
-      
+    try {
+      const completion = pendingCompletions.find(c => c.id === completionId);
+      if (!completion) return;
+
+      // タスク完了ステータスを更新
+      await database.updateTaskCompletion(completionId, {
+        status: approved ? 'APPROVED' : 'REJECTED',
+        approvedAt: new Date()
+      });
+
+      // 承認された場合はポイントを付与
       if (approved) {
         const task = tasks.find(t => t.id === completion.taskId);
         if (task) {
-          const transactions = storage.getPointTransactions();
-          const newTransaction: PointTransaction = {
-            id: storage.generateId(),
+          await database.createPointTransaction({
             userId: completion.childId,
             type: 'EARNED',
             amount: task.points,
             description: `タスク完了: ${task.title}`,
             createdAt: new Date()
-          };
-          transactions.push(newTransaction);
-          storage.savePointTransactions(transactions);
+          }, user.familyId);
         }
       }
       
-      storage.saveTaskCompletions(completions);
-      loadData();
+      // データを再読み込み
+      await loadData();
+    } catch (err) {
+      console.error('承認処理エラー:', err);
+      setError('承認処理に失敗しました');
     }
   };
 
@@ -69,26 +110,25 @@ const ParentDashboard: React.FC = () => {
     return task?.title || '不明なタスク';
   };
 
-  const getChildPoints = (childId: string) => {
-    const transactions = storage.getPointTransactions().filter(t => t.userId === childId);
-    return transactions.reduce((total, t) => {
-      return t.type === 'EARNED' ? total + t.amount : total - t.amount;
-    }, 0);
-  };
 
   const canDeleteTask = (taskId: string) => {
     // タスクが子供によって実行されていない場合のみ削除可能
-    const completions = storage.getTaskCompletions();
-    const hasCompletions = completions.some(c => c.taskId === taskId);
+    const hasCompletions = pendingCompletions.some(c => c.taskId === taskId);
     return !hasCompletions;
   };
 
-  const handleDeleteTask = (taskId: string) => {
+  const handleDeleteTask = async (taskId: string) => {
+    if (!user?.familyId) return;
+    
     if (canDeleteTask(taskId)) {
       if (confirm('このタスクを削除してもよろしいですか？')) {
-        const updatedTasks = tasks.filter(task => task.id !== taskId);
-        storage.saveTasks(updatedTasks);
-        loadData();
+        try {
+          await database.deleteTask(taskId);
+          await loadData();
+        } catch (err) {
+          console.error('タスク削除エラー:', err);
+          setError('タスクの削除に失敗しました');
+        }
       }
     } else {
       alert('子供が実行済みのタスクは削除できません。');
@@ -107,8 +147,8 @@ const ParentDashboard: React.FC = () => {
 
   // タスクの実行状況を取得
   const getTaskExecutionStatus = (taskId: string) => {
-    const completions = storage.getTaskCompletions();
-    const taskCompletions = completions.filter(c => c.taskId === taskId);
+    // 現在ロードされているpendingCompletionsから確認
+    const taskCompletions = pendingCompletions.filter(c => c.taskId === taskId);
     return taskCompletions;
   };
 
@@ -148,6 +188,31 @@ const ParentDashboard: React.FC = () => {
 
   const displayTasks = getDisplayTasks();
   const { notExecuted, executed } = separateTasksByExecution(displayTasks);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mx-auto mb-4"></div>
+          <p className="text-purple-600 text-lg font-medium">データを読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-600 text-lg mb-4">{error}</p>
+        <button
+          onClick={loadData}
+          className="btn-primary"
+        >
+          再読み込み
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -268,7 +333,7 @@ const ParentDashboard: React.FC = () => {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-2xl text-purple-600">{getChildPoints(child.id)}pt</p>
+                  <p className="font-bold text-2xl text-purple-600">{childrenPoints[child.id] || 0}pt</p>
                   <p className="text-xs text-purple-500">保有ポイント</p>
                 </div>
               </div>
@@ -444,7 +509,12 @@ const ParentDashboard: React.FC = () => {
       </div>
 
           {showCreateTask && (
-            <CreateTaskModal onClose={() => setShowCreateTask(false)} onSave={loadData} />
+            <CreateTaskModal 
+              onClose={() => setShowCreateTask(false)} 
+              onSave={loadData}
+              user={user}
+              children={children}
+            />
           )}
         </>
       )}
@@ -455,9 +525,11 @@ const ParentDashboard: React.FC = () => {
 interface CreateTaskModalProps {
   onClose: () => void;
   onSave: () => void;
+  user: any;
+  children: User[];
 }
 
-const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ onClose, onSave }) => {
+const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ onClose, onSave, user, children }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -468,24 +540,24 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ onClose, onSave }) =>
     assignedTo: '' // 空文字は「全員」を意味する
   });
 
-  const children = storage.getUsers().filter(user => user.role === 'CHILD');
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const tasks = storage.getTasks();
-    const newTask: Task = {
-      id: storage.generateId(),
-      ...formData,
-      assignedTo: formData.assignedTo || undefined,
-      createdBy: storage.getCurrentUser()?.id || '',
-      createdAt: new Date()
-    };
+    if (!user?.familyId) return;
     
-    tasks.push(newTask);
-    storage.saveTasks(tasks);
-    onSave();
-    onClose();
+    try {
+      await database.createTask({
+        ...formData,
+        assignedTo: formData.assignedTo || undefined,
+        createdBy: user.id
+      }, user.familyId);
+      
+      onSave();
+      onClose();
+    } catch (err) {
+      console.error('タスク作成エラー:', err);
+      alert('タスクの作成に失敗しました');
+    }
   };
 
   return (

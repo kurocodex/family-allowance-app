@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Task, TaskCompletion, Event } from '../types';
-import { storage } from '../utils/storage';
+import { database } from '../utils/database';
 import { useAuth } from '../hooks/useAuth';
 import { CheckCircle, Clock, Star, Award, Send, Calendar, BarChart3 } from 'lucide-react';
 import EventManagement from './EventManagement';
@@ -12,44 +12,64 @@ const ChildDashboard: React.FC = () => {
   const [myPoints, setMyPoints] = useState(0);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [currentTab, setCurrentTab] = useState<'tasks' | 'events' | 'stats'>('tasks');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) {
+    if (user?.familyId) {
       loadData();
     }
-  }, [user]);
+  }, [user?.familyId]);
 
-  const loadData = () => {
-    if (!user) return;
+  const loadData = async () => {
+    if (!user?.familyId) return;
     
-    setTasks(storage.getTasks());
-    setMyCompletions(storage.getTaskCompletions().filter(c => c.childId === user.id));
-    
-    const transactions = storage.getPointTransactions().filter(t => t.userId === user.id);
-    // 獲得ポイント - 使用ポイント = 残高ポイント
-    const earnedPoints = transactions.filter(t => t.type === 'EARNED').reduce((sum, t) => sum + t.amount, 0);
-    const spentPoints = transactions.filter(t => t.type === 'EXCHANGED').reduce((sum, t) => sum + t.amount, 0);
-    const currentBalance = earnedPoints - spentPoints;
-    setMyPoints(currentBalance);
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Supabaseからデータを取得
+      const [tasksData, completionsData, transactionsData] = await Promise.all([
+        database.getTasks(user.familyId),
+        database.getTaskCompletions(user.familyId),
+        database.getPointTransactions(user.familyId)
+      ]);
+      
+      setTasks(tasksData);
+      setMyCompletions(completionsData.filter(c => c.childId === user.id));
+      
+      // ポイント計算
+      const myTransactions = transactionsData.filter(t => t.userId === user.id);
+      const earnedPoints = myTransactions.filter(t => t.type === 'EARNED').reduce((sum, t) => sum + t.amount, 0);
+      const spentPoints = myTransactions.filter(t => t.type === 'EXCHANGED').reduce((sum, t) => sum + t.amount, 0);
+      const currentBalance = earnedPoints - spentPoints;
+      setMyPoints(currentBalance);
+    } catch (err) {
+      console.error('データ読み込みエラー:', err);
+      setError('データの読み込みに失敗しました');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleTaskSubmit = (taskId: string, comments: string) => {
-    if (!user) return;
+  const handleTaskSubmit = async (taskId: string, comments: string) => {
+    if (!user?.familyId) return;
     
-    const completions = storage.getTaskCompletions();
-    const newCompletion: TaskCompletion = {
-      id: storage.generateId(),
-      taskId,
-      childId: user.id,
-      status: 'PENDING',
-      submittedAt: new Date(),
-      comments
-    };
-    
-    completions.push(newCompletion);
-    storage.saveTaskCompletions(completions);
-    loadData();
-    setSelectedTask(null);
+    try {
+      await database.createTaskCompletion({
+        taskId,
+        childId: user.id,
+        status: 'PENDING',
+        submittedAt: new Date(),
+        comments
+      }, user.familyId);
+      
+      await loadData();
+      setSelectedTask(null);
+    } catch (err) {
+      console.error('タスク提出エラー:', err);
+      setError('タスクの提出に失敗しました');
+    }
   };
 
   const getTaskStatus = (taskId: string) => {
@@ -92,6 +112,31 @@ const ChildDashboard: React.FC = () => {
     const isAssignedToMe = !task.assignedTo || task.assignedTo === user?.id;
     return isAssignedToMe && status === 'APPROVED';
   });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mx-auto mb-4"></div>
+          <p className="text-purple-600 text-lg font-medium">データを読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-600 text-lg mb-4">{error}</p>
+        <button
+          onClick={loadData}
+          className="btn-primary"
+        >
+          再読み込み
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
