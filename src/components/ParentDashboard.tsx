@@ -59,7 +59,7 @@ const ParentDashboard: React.FC = () => {
       setChildrenPoints(pointsMap);
     } catch (err) {
       console.error('データ読み込みエラー:', err);
-      setError('データの読み込みに失敗しました');
+      setError('データベースの初期設定が必要です。Supabaseでdatabase-schema.sqlを実行してください。');
     } finally {
       setLoading(false);
     }

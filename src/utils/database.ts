@@ -4,17 +4,30 @@ import { User, Task, TaskCompletion, PointTransaction, Event, EventResult, RateR
 export const database = {
   // ユーザー関連
   async getUsers(familyId: string): Promise<User[]> {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('family_id', familyId);
-    
-    if (error) throw error;
-    return data?.map(user => ({
-      ...user,
-      createdAt: new Date(user.created_at),
-      birthDate: user.birth_date ? new Date(user.birth_date) : undefined
-    })) || [];
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('family_id', familyId);
+      
+      if (error) {
+        console.error('Database error:', error);
+        // テーブルが存在しない場合は空配列を返す
+        if (error.code === '42P01') {
+          console.warn('Users table does not exist. Please run database-schema.sql in Supabase.');
+          return [];
+        }
+        throw error;
+      }
+      return data?.map(user => ({
+        ...user,
+        createdAt: new Date(user.created_at),
+        birthDate: user.birth_date ? new Date(user.birth_date) : undefined
+      })) || [];
+    } catch (err) {
+      console.error('Error fetching users:', err);
+      return [];
+    }
   },
 
   async createUser(user: Omit<User, 'id' | 'createdAt'>): Promise<User> {
@@ -40,16 +53,28 @@ export const database = {
 
   // タスク関連
   async getTasks(familyId: string): Promise<Task[]> {
-    const { data, error } = await supabase
-      .from('tasks')
-      .select('*')
-      .eq('family_id', familyId);
-    
-    if (error) throw error;
-    return data?.map(task => ({
-      ...task,
-      createdAt: new Date(task.created_at)
-    })) || [];
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('family_id', familyId);
+      
+      if (error) {
+        console.error('Database error:', error);
+        if (error.code === '42P01') {
+          console.warn('Tasks table does not exist. Please run database-schema.sql in Supabase.');
+          return [];
+        }
+        throw error;
+      }
+      return data?.map(task => ({
+        ...task,
+        createdAt: new Date(task.created_at)
+      })) || [];
+    } catch (err) {
+      console.error('Error fetching tasks:', err);
+      return [];
+    }
   },
 
   async createTask(task: Omit<Task, 'id' | 'createdAt'>, familyId: string): Promise<Task> {
@@ -116,20 +141,32 @@ export const database = {
 
   // タスク完了関連
   async getTaskCompletions(familyId: string): Promise<TaskCompletion[]> {
-    const { data, error } = await supabase
-      .from('task_completions')
-      .select('*')
-      .eq('family_id', familyId);
-    
-    if (error) throw error;
-    return data?.map(completion => ({
-      ...completion,
-      taskId: completion.task_id,
-      childId: completion.child_id,
-      submittedAt: new Date(completion.submitted_at),
-      approvedAt: completion.approved_at ? new Date(completion.approved_at) : undefined,
-      photoUrl: completion.photo_url
-    })) || [];
+    try {
+      const { data, error } = await supabase
+        .from('task_completions')
+        .select('*')
+        .eq('family_id', familyId);
+      
+      if (error) {
+        console.error('Database error:', error);
+        if (error.code === '42P01') {
+          console.warn('Task completions table does not exist. Please run database-schema.sql in Supabase.');
+          return [];
+        }
+        throw error;
+      }
+      return data?.map(completion => ({
+        ...completion,
+        taskId: completion.task_id,
+        childId: completion.child_id,
+        submittedAt: new Date(completion.submitted_at),
+        approvedAt: completion.approved_at ? new Date(completion.approved_at) : undefined,
+        photoUrl: completion.photo_url
+      })) || [];
+    } catch (err) {
+      console.error('Error fetching task completions:', err);
+      return [];
+    }
   },
 
   async createTaskCompletion(completion: Omit<TaskCompletion, 'id'>, familyId: string): Promise<TaskCompletion> {
@@ -184,17 +221,29 @@ export const database = {
 
   // ポイント取引関連
   async getPointTransactions(familyId: string): Promise<PointTransaction[]> {
-    const { data, error } = await supabase
-      .from('point_transactions')
-      .select('*')
-      .eq('family_id', familyId);
-    
-    if (error) throw error;
-    return data?.map(transaction => ({
-      ...transaction,
-      userId: transaction.user_id,
-      createdAt: new Date(transaction.created_at)
-    })) || [];
+    try {
+      const { data, error } = await supabase
+        .from('point_transactions')
+        .select('*')
+        .eq('family_id', familyId);
+      
+      if (error) {
+        console.error('Database error:', error);
+        if (error.code === '42P01') {
+          console.warn('Point transactions table does not exist. Please run database-schema.sql in Supabase.');
+          return [];
+        }
+        throw error;
+      }
+      return data?.map(transaction => ({
+        ...transaction,
+        userId: transaction.user_id,
+        createdAt: new Date(transaction.created_at)
+      })) || [];
+    } catch (err) {
+      console.error('Error fetching point transactions:', err);
+      return [];
+    }
   },
 
   async createPointTransaction(transaction: Omit<PointTransaction, 'id'>, familyId: string): Promise<PointTransaction> {
