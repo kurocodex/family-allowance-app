@@ -10,6 +10,9 @@ export default defineConfig({
     strictPort: false
   },
   build: {
+    // CSP対応: evalを使用しないソースマップ生成
+    sourcemap: false,
+    minify: 'terser',
     // チャンクサイズの最適化
     rollupOptions: {
       output: {
@@ -24,7 +27,16 @@ export default defineConfig({
       }
     },
     // より小さなチャンクサイズ警告閾値
-    chunkSizeWarningLimit: 300
+    chunkSizeWarningLimit: 300,
+    // Terser設定でevalを避ける
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        // evalを使用しない設定
+        unsafe_eval: false
+      }
+    }
   },
   // プリロード戦略
   optimizeDeps: {
