@@ -72,9 +72,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const getInitialSession = async () => {
     try {
-      // セッション取得にタイムアウトを設定（10秒）
+      // セッション取得にタイムアウトを設定（30秒）
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Session timeout')), 10000)
+        setTimeout(() => reject(new Error('Session timeout')), 30000)
       );
 
       const sessionPromise = supabase.auth.getSession();
@@ -91,8 +91,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await fetchUserProfile(session.user.id);
       }
     } catch (error) {
-      console.error('Error in getInitialSession:', error);
-      // タイムアウト時も確実にloading状態を解除
+      if (error instanceof Error && error.message === 'Session timeout') {
+        console.warn('Session initialization timed out, proceeding without auth');
+      } else {
+        console.error('Error in getInitialSession:', error);
+      }
+      // エラー時も確実にloading状態を解除
     } finally {
       setLoading(false);
     }
