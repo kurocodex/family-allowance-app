@@ -75,35 +75,56 @@ const FamilyManagement: React.FC = () => {
     try {
       if (!user?.familyId) throw new Error('Family ID not found');
 
-      // 子供用の簡単なログインコードを生成
+      // 子供用のメールアドレス（あなたのメールアドレス+数字）
       const childCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const userEmailParts = user.email.split('@');
+      const childEmail = `${userEmailParts[0]}+child${childCode}@${userEmailParts[1]}`;
+      const tempPassword = `child${Math.random().toString(36).substring(2, 6)}`;
       
-      // SupabaseのAuthを使わず、直接usersテーブルに作成
-      // UUIDを自動生成
-      const { data: newChild, error: profileError } = await supabase
-        .from('users')
-        .insert({
-          family_id: user.familyId,
-          name: childData.name,
-          role: 'CHILD',
-          age: childData.age,
-          birth_date: childData.birthDate || null,
-          child_code: childCode,
-        })
-        .select()
-        .single();
-
-      if (profileError) throw profileError;
-
-      // 家族メンバーリストを更新
-      await loadFamilyMembers();
+      console.log('Creating child with email:', childEmail); // デバッグ用
       
-      alert(`子供アカウントが作成されました！🎉\n\n📱 子供用ログイン情報:\n👤 名前: ${childData.name}\n🔑 コード: ${childCode}\n\n※この情報を子供に教えてあげてください！\nメールアドレスは不要です。`);
+      // Supabase Authで子供アカウント作成
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: childEmail,
+        password: tempPassword,
+      });
+
+      if (authError) throw authError;
+
+      if (authData.user) {
+        // ユーザープロフィール作成
+        const { error: profileError } = await supabase
+          .from('users')
+          .insert({
+            id: authData.user.id,
+            family_id: user.familyId,
+            name: childData.name,
+            role: 'CHILD',
+            age: childData.age,
+            birth_date: childData.birthDate || null,
+            child_code: childCode,
+          });
+
+        if (profileError) throw profileError;
+
+        // 家族メンバーリストを更新
+        await loadFamilyMembers();
+        
+        alert(`子供アカウントが作成されました！🎉\n\n📱 子供用ログイン情報:\n📧 メール: ${childEmail}\n🔑 パスワード: ${tempPassword}\n👤 名前: ${childData.name}\n\n※メール確認が必要な場合があります`);
+      }
     } catch (error) {
       console.error('Error creating child account:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
+      
       // 詳細なエラー情報を表示
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      alert(`子供アカウントの作成に失敗しました:\n${errorMessage}`);
+      let errorMessage = 'Unknown error';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (error && typeof error === 'object') {
+        errorMessage = JSON.stringify(error, null, 2);
+      }
+      
+      alert(`子供アカウントの作成に失敗しました:\n\n${errorMessage}\n\n※ブラウザのConsoleタブで詳細を確認してください`);
     }
   };
 
