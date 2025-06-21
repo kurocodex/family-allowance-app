@@ -241,74 +241,99 @@ const ParentDashboard: React.FC = () => {
         )}
       </div>
 
-      {/* メインタブ */}
-      <div className="flex gap-4 mb-6">
-        <button
-          onClick={() => handleTabChange('tasks')}
-          className={`px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 ${
-            currentTab === 'tasks'
-              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          <Award className="w-5 h-5" />
-          🎯 クエスト管理
-        </button>
-        <button
-          onClick={() => handleTabChange('events')}
-          className={`px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 ${
-            currentTab === 'events'
-              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          <Calendar className="w-5 h-5" />
-          🎉 イベント管理
-        </button>
-        <button
-          onClick={() => handleTabChange('statistics')}
-          className={`px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 ${
-            currentTab === 'statistics'
-              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          <BarChart3 className="w-5 h-5" />
-          📊 統計・レポート
-        </button>
-        <button
-          onClick={() => handleTabChange('rates')}
-          className={`px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 ${
-            currentTab === 'rates'
-              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          <Settings className="w-5 h-5" />
-          ⚙️ レート設定
-        </button>
-        <button
-          onClick={() => handleTabChange('exchange')}
-          className={`px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 ${
-            currentTab === 'exchange'
-              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          <Coins className="w-5 h-5" />
-          💰 ポイント交換
-        </button>
-        <button
-          onClick={() => handleTabChange('family')}
-          className={`px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 ${
-            currentTab === 'family'
-              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          <Users className="w-5 h-5" />
-          👨‍👩‍👧‍👦 家族管理
-        </button>
+      {/* メインタブ - モバイル最適化 */}
+      <div className="mb-6">
+        {/* モバイル用: ドロップダウンメニュー */}
+        <div className="md:hidden">
+          <select
+            value={currentTab}
+            onChange={(e) => handleTabChange(e.target.value as any)}
+            className="w-full p-4 bg-white border-2 border-purple-300 rounded-2xl font-bold text-purple-800 text-lg shadow-lg focus:ring-4 focus:ring-purple-200 focus:border-purple-500"
+          >
+            <option value="tasks">🎯 クエスト管理</option>
+            <option value="events">🎉 イベント管理</option>
+            <option value="statistics">📊 統計・レポート</option>
+            <option value="rates">⚙️ レート設定</option>
+            <option value="exchange">💰 ポイント交換</option>
+            <option value="family">👨‍👩‍👧‍👦 家族管理</option>
+          </select>
+        </div>
+
+        {/* デスクトップ用: 横並びボタン */}
+        <div className="hidden md:flex gap-2 lg:gap-4 flex-wrap">
+          <button
+            onClick={() => handleTabChange('tasks')}
+            className={`px-4 lg:px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 text-sm lg:text-base ${
+              currentTab === 'tasks'
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            <Award className="w-4 h-4 lg:w-5 lg:h-5" />
+            <span className="hidden lg:inline">🎯 クエスト管理</span>
+            <span className="lg:hidden">🎯 クエスト</span>
+          </button>
+          <button
+            onClick={() => handleTabChange('events')}
+            className={`px-4 lg:px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 text-sm lg:text-base ${
+              currentTab === 'events'
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            <Calendar className="w-4 h-4 lg:w-5 lg:h-5" />
+            <span className="hidden lg:inline">🎉 イベント管理</span>
+            <span className="lg:hidden">🎉 イベント</span>
+          </button>
+          <button
+            onClick={() => handleTabChange('statistics')}
+            className={`px-4 lg:px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 text-sm lg:text-base ${
+              currentTab === 'statistics'
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            <BarChart3 className="w-4 h-4 lg:w-5 lg:h-5" />
+            <span className="hidden lg:inline">📊 統計・レポート</span>
+            <span className="lg:hidden">📊 統計</span>
+          </button>
+          <button
+            onClick={() => handleTabChange('rates')}
+            className={`px-4 lg:px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 text-sm lg:text-base ${
+              currentTab === 'rates'
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            <Settings className="w-4 h-4 lg:w-5 lg:h-5" />
+            <span className="hidden lg:inline">⚙️ レート設定</span>
+            <span className="lg:hidden">⚙️ レート</span>
+          </button>
+          <button
+            onClick={() => handleTabChange('exchange')}
+            className={`px-4 lg:px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 text-sm lg:text-base ${
+              currentTab === 'exchange'
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            <Coins className="w-4 h-4 lg:w-5 lg:h-5" />
+            <span className="hidden lg:inline">💰 ポイント交換</span>
+            <span className="lg:hidden">💰 ポイント</span>
+          </button>
+          <button
+            onClick={() => handleTabChange('family')}
+            className={`px-4 lg:px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 text-sm lg:text-base ${
+              currentTab === 'family'
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            <Users className="w-4 h-4 lg:w-5 lg:h-5" />
+            <span className="hidden lg:inline">👨‍👩‍👧‍👦 家族管理</span>
+            <span className="lg:hidden">👨‍👩‍👧‍👦 家族</span>
+          </button>
+        </div>
       </div>
 
       {/* タブ内容 */}
@@ -405,45 +430,65 @@ const ParentDashboard: React.FC = () => {
           <h3 className="text-xl font-bold text-green-700">🎯 クエスト管理</h3>
         </div>
         
-        {/* タブナビゲーション */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          <button
-            onClick={() => setSelectedChildId('all')}
-            className={`px-4 py-2 rounded-full font-medium transition-all ${
-              selectedChildId === 'all'
-                ? 'bg-purple-500 text-white shadow-lg'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            👨‍👩‍👧‍👦 全体表示
-          </button>
-          <button
-            onClick={() => setSelectedChildId('general')}
-            className={`px-4 py-2 rounded-full font-medium transition-all ${
-              selectedChildId === 'general'
-                ? 'bg-purple-500 text-white shadow-lg'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            👥 全員対象
-          </button>
-          {children.map(child => (
+        {/* タブナビゲーション - モバイル最適化 */}
+        <div className="mb-6">
+          {/* モバイル用: セレクトボックス */}
+          <div className="md:hidden">
+            <select
+              value={selectedChildId}
+              onChange={(e) => setSelectedChildId(e.target.value)}
+              className="w-full p-3 bg-white border-2 border-purple-300 rounded-xl font-medium text-purple-800 shadow-md"
+            >
+              <option value="all">👨‍👩‍👧‍👦 全体表示</option>
+              <option value="general">👥 全員対象</option>
+              {children.map(child => (
+                <option key={child.id} value={child.id}>
+                  {child.name}さん
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* タブレット・デスクトップ用: ボタン */}
+          <div className="hidden md:flex flex-wrap gap-2">
             <button
-              key={child.id}
-              onClick={() => setSelectedChildId(child.id)}
-              className={`px-4 py-2 rounded-full font-medium transition-all ${
-                selectedChildId === child.id
+              onClick={() => setSelectedChildId('all')}
+              className={`px-3 lg:px-4 py-2 rounded-full font-medium transition-all text-sm lg:text-base ${
+                selectedChildId === 'all'
                   ? 'bg-purple-500 text-white shadow-lg'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              {child.name}さん
+              👨‍👩‍👧‍👦 全体表示
             </button>
-          ))}
+            <button
+              onClick={() => setSelectedChildId('general')}
+              className={`px-3 lg:px-4 py-2 rounded-full font-medium transition-all text-sm lg:text-base ${
+                selectedChildId === 'general'
+                  ? 'bg-purple-500 text-white shadow-lg'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              👥 全員対象
+            </button>
+            {children.map(child => (
+              <button
+                key={child.id}
+                onClick={() => setSelectedChildId(child.id)}
+                className={`px-3 lg:px-4 py-2 rounded-full font-medium transition-all text-sm lg:text-base ${
+                  selectedChildId === child.id
+                    ? 'bg-purple-500 text-white shadow-lg'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                {child.name}さん
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* タスク表示エリア */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* タスク表示エリア - モバイル最適化 */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
           {/* 実行前タスク */}
           <div>
             <h4 className="text-lg font-bold text-blue-700 mb-4 flex items-center gap-2">
@@ -453,24 +498,24 @@ const ParentDashboard: React.FC = () => {
               {notExecuted.map(task => {
                 const assignedChild = task.assignedTo ? children.find(c => c.id === task.assignedTo) : null;
                 return (
-                  <div key={task.id} className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl border-2 border-blue-200 hover:shadow-lg transition-all">
+                  <div key={task.id} className="p-3 lg:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl border-2 border-blue-200 hover:shadow-lg transition-all">
                     <div className="flex items-start justify-between mb-2">
-                      <h5 className="font-bold text-blue-800">{task.title}</h5>
-                      <span className="text-lg font-bold text-purple-600 bg-white px-3 py-1 rounded-full border-2 border-purple-300">
+                      <h5 className="font-bold text-blue-800 text-sm lg:text-base leading-tight">{task.title}</h5>
+                      <span className="text-sm lg:text-lg font-bold text-purple-600 bg-white px-2 lg:px-3 py-1 rounded-full border-2 border-purple-300 whitespace-nowrap ml-2">
                         {task.points}pt
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs px-3 py-1 bg-blue-200 text-blue-700 rounded-full">{task.category}</span>
-                      <span className="text-xs px-3 py-1 bg-purple-200 text-purple-700 rounded-full">
+                    <div className="flex items-center gap-1 lg:gap-2 mb-2 flex-wrap">
+                      <span className="text-xs px-2 lg:px-3 py-1 bg-blue-200 text-blue-700 rounded-full">{task.category}</span>
+                      <span className="text-xs px-2 lg:px-3 py-1 bg-purple-200 text-purple-700 rounded-full">
                         {assignedChild ? assignedChild.name : '全員'}
                       </span>
                     </div>
-                    <p className="text-sm text-blue-700 mb-3">{task.description}</p>
+                    <p className="text-xs lg:text-sm text-blue-700 mb-3 leading-relaxed">{task.description}</p>
                     <div className="flex justify-end">
                       <button
                         onClick={() => handleDeleteTask(task.id)}
-                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors touch-manipulation"
                         title="クエストを削除"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -497,23 +542,23 @@ const ParentDashboard: React.FC = () => {
                 const assignedChild = task.assignedTo ? children.find(c => c.id === task.assignedTo) : null;
                 const completions = getTaskExecutionStatus(task.id);
                 return (
-                  <div key={task.id} className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border-2 border-green-200">
+                  <div key={task.id} className="p-3 lg:p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border-2 border-green-200">
                     <div className="flex items-start justify-between mb-2">
-                      <h5 className="font-bold text-green-800">{task.title}</h5>
-                      <span className="text-lg font-bold text-purple-600 bg-white px-3 py-1 rounded-full border-2 border-purple-300">
+                      <h5 className="font-bold text-green-800 text-sm lg:text-base leading-tight">{task.title}</h5>
+                      <span className="text-sm lg:text-lg font-bold text-purple-600 bg-white px-2 lg:px-3 py-1 rounded-full border-2 border-purple-300 whitespace-nowrap ml-2">
                         {task.points}pt
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs px-3 py-1 bg-green-200 text-green-700 rounded-full">{task.category}</span>
-                      <span className="text-xs px-3 py-1 bg-purple-200 text-purple-700 rounded-full">
+                    <div className="flex items-center gap-1 lg:gap-2 mb-2 flex-wrap">
+                      <span className="text-xs px-2 lg:px-3 py-1 bg-green-200 text-green-700 rounded-full">{task.category}</span>
+                      <span className="text-xs px-2 lg:px-3 py-1 bg-purple-200 text-purple-700 rounded-full">
                         {assignedChild ? assignedChild.name : '全員'}
                       </span>
-                      <span className="text-xs px-3 py-1 bg-emerald-200 text-emerald-700 rounded-full">
+                      <span className="text-xs px-2 lg:px-3 py-1 bg-emerald-200 text-emerald-700 rounded-full">
                         {completions.length}回実行
                       </span>
                     </div>
-                    <p className="text-sm text-green-700">{task.description}</p>
+                    <p className="text-xs lg:text-sm text-green-700 leading-relaxed">{task.description}</p>
                   </div>
                 );
               })}

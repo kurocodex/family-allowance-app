@@ -1,4 +1,4 @@
-import{u as E,j as e,s as f}from"./index-ba943a40.js";import{r as m}from"./vendor-ce4ffebd.js";import{b as S,i as M,u as I,U as k,l as A}from"./icons-828367c1.js";import"./routing-89dfa7f7.js";import"./supabase-e6e84841.js";const R=({onDataUpdate:h})=>{const{user:r}=E(),[t,x]=m.useState([]),[u,g]=m.useState(!0),[b,l]=m.useState(!1),[n,c]=m.useState("");m.useEffect(()=>{r&&v()},[r]);const p=async()=>{t.length===0&&await d()},d=async()=>{try{if(!r)return;const{data:a,error:s}=await f.from("users").select(`
+import{u as E,j as e,s as f}from"./index-712c3e67.js";import{r as m}from"./vendor-ce4ffebd.js";import{b as S,i as M,u as I,U as k,l as A}from"./icons-828367c1.js";import"./routing-89dfa7f7.js";import"./supabase-e6e84841.js";const R=({onDataUpdate:h})=>{const{user:r}=E(),[t,x]=m.useState([]),[u,g]=m.useState(!0),[b,l]=m.useState(!1),[n,c]=m.useState("");m.useEffect(()=>{r&&v()},[r]);const p=async()=>{t.length===0&&await d()},d=async()=>{try{if(!r)return;const{data:a,error:s}=await f.from("users").select(`
           id,
           name,
           role,
