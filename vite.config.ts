@@ -32,10 +32,9 @@ export default defineConfig({
     terserOptions: {
       compress: {
         drop_console: true,
-        drop_debugger: true,
-        // evalを使用しない設定
-        unsafe_eval: false
-      }
+        drop_debugger: true
+      },
+      mangle: true
     }
   },
   // プリロード戦略
