@@ -251,17 +251,62 @@ const CreateChildModal: React.FC<CreateChildModalProps> = ({ onClose, onSave }) 
     birthDate: ''
   });
 
+  // 誕生日から年齢を自動計算
+  const calculateAgeFromBirthDate = (birthDate: string) => {
+    if (!birthDate) return '';
+    
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    
+    return age.toString();
+  };
+
+  // 誕生日変更時に年齢を自動更新
+  const handleBirthDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const birthDate = e.target.value;
+    const calculatedAge = calculateAgeFromBirthDate(birthDate);
+    
+    setFormData({ 
+      ...formData, 
+      birthDate,
+      age: calculatedAge
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.age) {
-      alert('名前と年齢は必須です');
+    if (!formData.name) {
+      alert('名前は必須です');
+      return;
+    }
+
+    // 年齢は誕生日から計算、または手動入力
+    let finalAge: number;
+    if (formData.birthDate) {
+      finalAge = parseInt(calculateAgeFromBirthDate(formData.birthDate));
+    } else if (formData.age) {
+      finalAge = parseInt(formData.age);
+    } else {
+      alert('誕生日または年齢のどちらかを入力してください');
+      return;
+    }
+
+    // 最小年齢チェックを緩和（1歳以上）
+    if (finalAge < 1 || finalAge > 18) {
+      alert('年齢は1歳から18歳までの範囲で入力してください');
       return;
     }
 
     onSave({
       name: formData.name,
-      age: parseInt(formData.age),
+      age: finalAge,
       birthDate: formData.birthDate ? new Date(formData.birthDate) : undefined
     });
     
@@ -289,27 +334,32 @@ const CreateChildModal: React.FC<CreateChildModalProps> = ({ onClose, onSave }) 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-purple-700 mb-2">年齢</label>
+            <label className="block text-sm font-medium text-purple-700 mb-2">誕生日</label>
+            <input
+              type="date"
+              value={formData.birthDate}
+              onChange={handleBirthDateChange}
+              className="input-field"
+              max={new Date().toISOString().split('T')[0]} // 今日以前の日付のみ
+            />
+            <p className="text-xs text-purple-600 mt-1">誕生日を入力すると年齢が自動計算されます</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-purple-700 mb-2">年齢 {formData.birthDate && '(自動計算)'}</label>
             <input
               type="number"
-              min="3"
+              min="1"
               max="18"
               value={formData.age}
               onChange={(e) => setFormData({ ...formData, age: e.target.value })}
               className="input-field"
               placeholder="例: 8"
-              required
+              disabled={!!formData.birthDate} // 誕生日入力時は無効化
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-purple-700 mb-2">誕生日（任意）</label>
-            <input
-              type="date"
-              value={formData.birthDate}
-              onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
-              className="input-field"
-            />
+            <p className="text-xs text-purple-600 mt-1">
+              {formData.birthDate ? '誕生日から自動計算されています' : '誕生日未入力の場合は手動で入力してください'}
+            </p>
           </div>
 
           <div className="flex justify-center gap-4 pt-4">
