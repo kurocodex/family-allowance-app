@@ -4,7 +4,11 @@ import { supabase } from '../utils/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { UserPlus, Users, Mail, Key, Trash2, Crown, User as UserIcon } from 'lucide-react';
 
-const FamilyManagement: React.FC = () => {
+interface FamilyManagementProps {
+  onDataUpdate?: () => void;
+}
+
+const FamilyManagement: React.FC<FamilyManagementProps> = ({ onDataUpdate }) => {
   const { user } = useAuth();
   const [familyMembers, setFamilyMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -109,6 +113,11 @@ const FamilyManagement: React.FC = () => {
 
         // 家族メンバーリストを更新
         await loadFamilyMembers();
+        
+        // 親コンポーネントにデータ更新を通知
+        if (onDataUpdate) {
+          onDataUpdate();
+        }
         
         alert(`子供アカウントが作成されました！🎉\n\n📱 子供用ログイン情報:\n📧 メール: ${childEmail}\n🔑 パスワード: ${tempPassword}\n👤 名前: ${childData.name}\n\n※メール確認が必要な場合があります`);
       }

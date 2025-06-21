@@ -24,6 +24,15 @@ const ParentDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // タブ切り替え時のデータ更新
+  const handleTabChange = (newTab: 'tasks' | 'events' | 'statistics' | 'rates' | 'exchange' | 'family') => {
+    setCurrentTab(newTab);
+    // 家族管理タブから他のタブに移動する場合は、データを最新に更新
+    if (currentTab === 'family' && newTab !== 'family') {
+      loadData();
+    }
+  };
+
   useEffect(() => {
     if (user?.familyId) {
       loadData();
@@ -235,7 +244,7 @@ const ParentDashboard: React.FC = () => {
       {/* メインタブ */}
       <div className="flex gap-4 mb-6">
         <button
-          onClick={() => setCurrentTab('tasks')}
+          onClick={() => handleTabChange('tasks')}
           className={`px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 ${
             currentTab === 'tasks'
               ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
@@ -246,7 +255,7 @@ const ParentDashboard: React.FC = () => {
           🎯 クエスト管理
         </button>
         <button
-          onClick={() => setCurrentTab('events')}
+          onClick={() => handleTabChange('events')}
           className={`px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 ${
             currentTab === 'events'
               ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
@@ -257,7 +266,7 @@ const ParentDashboard: React.FC = () => {
           🎉 イベント管理
         </button>
         <button
-          onClick={() => setCurrentTab('statistics')}
+          onClick={() => handleTabChange('statistics')}
           className={`px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 ${
             currentTab === 'statistics'
               ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
@@ -268,7 +277,7 @@ const ParentDashboard: React.FC = () => {
           📊 統計・レポート
         </button>
         <button
-          onClick={() => setCurrentTab('rates')}
+          onClick={() => handleTabChange('rates')}
           className={`px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 ${
             currentTab === 'rates'
               ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
@@ -279,7 +288,7 @@ const ParentDashboard: React.FC = () => {
           ⚙️ レート設定
         </button>
         <button
-          onClick={() => setCurrentTab('exchange')}
+          onClick={() => handleTabChange('exchange')}
           className={`px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 ${
             currentTab === 'exchange'
               ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
@@ -290,7 +299,7 @@ const ParentDashboard: React.FC = () => {
           💰 ポイント交換
         </button>
         <button
-          onClick={() => setCurrentTab('family')}
+          onClick={() => handleTabChange('family')}
           className={`px-6 py-3 rounded-full font-bold transition-all flex items-center gap-2 ${
             currentTab === 'family'
               ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
@@ -321,7 +330,7 @@ const ParentDashboard: React.FC = () => {
         </Suspense>
       ) : currentTab === 'family' ? (
         <Suspense fallback={<div className="text-center py-8">家族管理を読み込み中...</div>}>
-          <FamilyManagement />
+          <FamilyManagement onDataUpdate={loadData} />
         </Suspense>
       ) : (
         <>
