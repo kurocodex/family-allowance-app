@@ -69,6 +69,11 @@ const Dashboard: React.FC = () => {
           {user.role === 'PARENT' ? <ParentDashboard /> : <ChildDashboard />}
         </Suspense>
       </main>
+
+      {/* アカウント設定モーダル */}
+      {showAccountSettings && (
+        <AccountSettings onClose={() => setShowAccountSettings(false)} />
+      )}
     </div>
   );
 };
