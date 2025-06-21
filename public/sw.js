@@ -2,9 +2,9 @@
 const CACHE_NAME = 'family-app-v1';
 const urlsToCache = [
   '/',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
   '/manifest.json'
+  // Viteビルド用: /assets/ 配下のファイルは動的キャッシュで対応
+  // 静的パスでのキャッシュは404エラーの原因になるため除外
 ];
 
 // Install event
