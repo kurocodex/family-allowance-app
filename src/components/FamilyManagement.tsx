@@ -75,41 +75,30 @@ const FamilyManagement: React.FC = () => {
     try {
       if (!user?.familyId) throw new Error('Family ID not found');
 
-      // 子供用の仮パスワードを生成
-      const tempPassword = `child${Math.random().toString(36).substring(2, 6)}`;
-      // 有効なメール形式に変更（日本語名も対応）
-      const sanitizedName = childData.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const randomSuffix = Math.random().toString(36).substring(2, 8);
-      const tempEmail = `${sanitizedName}${randomSuffix}@example.com`;
+      // 子供用の簡単なログインコードを生成
+      const childCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      
+      // SupabaseのAuthを使わず、直接usersテーブルに作成
+      // UUIDを自動生成
+      const { data: newChild, error: profileError } = await supabase
+        .from('users')
+        .insert({
+          family_id: user.familyId,
+          name: childData.name,
+          role: 'CHILD',
+          age: childData.age,
+          birth_date: childData.birthDate || null,
+          child_code: childCode,
+        })
+        .select()
+        .single();
 
-      // 通常のユーザー登録を使用
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: tempEmail,
-        password: tempPassword,
-      });
+      if (profileError) throw profileError;
 
-      if (authError) throw authError;
-
-      if (authData.user) {
-        // ユーザープロフィール作成
-        const { error: profileError } = await supabase
-          .from('users')
-          .insert({
-            id: authData.user.id,
-            family_id: user.familyId,
-            name: childData.name,
-            role: 'CHILD',
-            age: childData.age,
-            birth_date: childData.birthDate || null,
-          });
-
-        if (profileError) throw profileError;
-
-        // 家族メンバーリストを更新
-        await loadFamilyMembers();
-        
-        alert(`子供アカウントが作成されました！\n\nログイン情報:\nメール: ${tempEmail}\nパスワード: ${tempPassword}\n\n※この情報を安全に保管してください`);
-      }
+      // 家族メンバーリストを更新
+      await loadFamilyMembers();
+      
+      alert(`子供アカウントが作成されました！🎉\n\n📱 子供用ログイン情報:\n👤 名前: ${childData.name}\n🔑 コード: ${childCode}\n\n※この情報を子供に教えてあげてください！\nメールアドレスは不要です。`);
     } catch (error) {
       console.error('Error creating child account:', error);
       // 詳細なエラー情報を表示
