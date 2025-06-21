@@ -245,7 +245,9 @@ const ParentDashboard: React.FC = () => {
       ) : currentTab === 'exchange' ? (
         <PointExchange />
       ) : currentTab === 'family' ? (
-        <FamilyManagement />
+        <React.Suspense fallback={<div className="text-center py-8">家族管理を読み込み中...</div>}>
+          <FamilyManagement />
+        </React.Suspense>
       ) : (
         <>
           {/* お子様の状況と承認待ち */}

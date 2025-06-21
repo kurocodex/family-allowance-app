@@ -12,11 +12,18 @@ const FamilyManagement: React.FC = () => {
   const [inviteCode, setInviteCode] = useState('');
 
   useEffect(() => {
+    // 家族管理タブが選択されたときのみ読み込み
     if (user) {
-      loadFamilyMembers();
       generateInviteCode();
     }
   }, [user]);
+
+  // 家族メンバーデータの遅延読み込み
+  const loadFamilyMembersOnDemand = async () => {
+    if (familyMembers.length === 0) {
+      await loadFamilyMembers();
+    }
+  };
 
   const loadFamilyMembers = async () => {
     try {
@@ -132,8 +139,21 @@ const FamilyManagement: React.FC = () => {
     );
   }
 
-  if (loading) {
-    return <div className="text-center py-8">読み込み中...</div>;
+  // 初回は簡単な表示
+  if (loading && familyMembers.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-8">
+          <h3 className="text-xl font-bold text-purple-700 mb-4">👨‍👩‍👧‍👦 家族管理</h3>
+          <button
+            onClick={loadFamilyMembersOnDemand}
+            className="btn-primary"
+          >
+            家族メンバーを読み込む
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
