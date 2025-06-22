@@ -11,7 +11,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://adtsbzzizbwjiqrkqofp.supabase.co https://vercel.live; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://adtsbzzizbwjiqrkqofp.supabase.co wss://adtsbzzizbwjiqrkqofp.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://adtsbzzizbwjiqrkqofp.supabase.co https://vercel.live; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://adtsbzzizbwjiqrkqofp.supabase.co wss://adtsbzzizbwjiqrkqofp.supabase.co; frame-src https://vercel.live; object-src 'none'; base-uri 'self'; form-action 'self';"
         },
         {
           "key": "X-Content-Type-Options",

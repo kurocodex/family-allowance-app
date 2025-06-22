@@ -76,57 +76,101 @@ class CacheInvalidationManager {
 
     const notification = document.createElement('div');
     notification.className = 'app-update-notification';
-    notification.innerHTML = `
-      <div style="
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 16px 24px;
-        border-radius: 12px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        z-index: 10000;
-        font-family: system-ui, -apple-system, sans-serif;
-        max-width: 320px;
-        animation: slideIn 0.3s ease-out;
-      ">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="font-size: 24px;">🎉</div>
-          <div>
-            <div style="font-weight: 600; margin-bottom: 4px;">新しいバージョンが利用可能です</div>
-            <div style="font-size: 14px; opacity: 0.9;">より良い体験のためにアップデートしませんか？</div>
-          </div>
-        </div>
-        <div style="margin-top: 12px; display: flex; gap: 8px;">
-          <button onclick="window.location.reload()" style="
-            background: white;
-            color: #667eea;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-          ">アップデート</button>
-          <button onclick="this.parentElement.parentElement.parentElement.remove()" style="
-            background: transparent;
-            color: white;
-            border: 1px solid rgba(255,255,255,0.3);
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-          ">後で</button>
-        </div>
-      </div>
-      <style>
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      z-index: 10000;
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 320px;
+      animation: slideIn 0.3s ease-out;
+    `;
+
+    // 通知内容を作成
+    const content = document.createElement('div');
+    
+    // ヘッダー部分
+    const header = document.createElement('div');
+    header.style.cssText = 'display: flex; align-items: center; gap: 12px;';
+    
+    const emoji = document.createElement('div');
+    emoji.style.cssText = 'font-size: 24px;';
+    emoji.textContent = '🎉';
+    
+    const textContainer = document.createElement('div');
+    
+    const title = document.createElement('div');
+    title.style.cssText = 'font-weight: 600; margin-bottom: 4px;';
+    title.textContent = '新しいバージョンが利用可能です';
+    
+    const subtitle = document.createElement('div');
+    subtitle.style.cssText = 'font-size: 14px; opacity: 0.9;';
+    subtitle.textContent = 'より良い体験のためにアップデートしませんか？';
+    
+    textContainer.appendChild(title);
+    textContainer.appendChild(subtitle);
+    header.appendChild(emoji);
+    header.appendChild(textContainer);
+    
+    // ボタン部分
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.cssText = 'margin-top: 12px; display: flex; gap: 8px;';
+    
+    const updateButton = document.createElement('button');
+    updateButton.style.cssText = `
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+    `;
+    updateButton.textContent = 'アップデート';
+    updateButton.addEventListener('click', async () => {
+      await this.handleAppUpdate();
+    });
+    
+    const laterButton = document.createElement('button');
+    laterButton.style.cssText = `
+      background: transparent;
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    `;
+    laterButton.textContent = '後で';
+    laterButton.addEventListener('click', () => {
+      notification.remove();
+    });
+    
+    buttonContainer.appendChild(updateButton);
+    buttonContainer.appendChild(laterButton);
+    
+    content.appendChild(header);
+    content.appendChild(buttonContainer);
+    notification.appendChild(content);
+
+    // CSSアニメーションを追加
+    if (!document.querySelector('#update-notification-styles')) {
+      const style = document.createElement('style');
+      style.id = 'update-notification-styles';
+      style.textContent = `
         @keyframes slideIn {
           from { transform: translateX(100%); opacity: 0; }
           to { transform: translateX(0); opacity: 1; }
         }
-      </style>
-    `;
+      `;
+      document.head.appendChild(style);
+    }
 
     document.body.appendChild(notification);
 
@@ -152,22 +196,50 @@ class CacheInvalidationManager {
   // アプリケーション更新時の処理
   async handleAppUpdate(): Promise<void> {
     try {
-      await this.clearCaches();
-      
-      // Service Workerを更新
+      // 更新中のフィードバックを表示
+      const notification = document.querySelector('.app-update-notification');
+      if (notification) {
+        const button = notification.querySelector('button');
+        if (button) {
+          button.textContent = '更新中...';
+          button.disabled = true;
+        }
+      }
+
+      // Service Workerの更新を強制
       if ('serviceWorker' in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(
-          registrations.map(registration => registration.unregister())
-        );
+        for (const registration of registrations) {
+          // 新しいService Workerを強制インストール
+          if (registration.waiting) {
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+          }
+          
+          // Service Workerを更新
+          await registration.update();
+        }
       }
+
+      // キャッシュをクリア
+      await this.clearCaches();
       
-      // ページをリロード
-      window.location.reload();
+      // LocalStorageの一時データをクリア（ユーザーデータは保持）
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && !key.includes('user') && !key.includes('auth') && !key.includes('settings')) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      
+      // 強制リロード（キャッシュバスト）
+      window.location.href = window.location.origin + window.location.pathname + '?updated=' + Date.now();
+      
     } catch (error) {
       console.error('アプリ更新エラー:', error);
-      // フォールバック: 強制リロード
-      window.location.href = window.location.href;
+      // エラーが発生した場合でも強制リロード
+      window.location.reload(true);
     }
   }
 }

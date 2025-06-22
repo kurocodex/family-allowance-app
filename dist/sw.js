@@ -4,6 +4,13 @@ const CACHE_NAME = `family-app-v${APP_VERSION}`;
 const STATIC_CACHE = `static-${APP_VERSION}`;
 const DYNAMIC_CACHE = `dynamic-${APP_VERSION}`;
 
+// メッセージハンドラー
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 // キャッシュするリソースのパターン
 const STATIC_URLS = [
   '/',
@@ -98,20 +105,23 @@ self.addEventListener('fetch', (event) => {
 async function networkFirst(request) {
   try {
     const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
+    if (networkResponse.ok && request.method === 'GET') {
       const cache = await caches.open(DYNAMIC_CACHE);
-      cache.put(request, networkResponse.clone());
+      // レスポンスをクローンしてからキャッシュに保存
+      cache.put(request.clone(), networkResponse.clone());
     }
     return networkResponse;
   } catch (error) {
     console.log('[SW] Network failed, trying cache:', request.url);
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-    // オフライン時のフォールバック
-    if (request.destination === 'document') {
-      return caches.match('/');
+    if (request.method === 'GET') {
+      const cachedResponse = await caches.match(request);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      // オフライン時のフォールバック
+      if (request.destination === 'document') {
+        return caches.match('/');
+      }
     }
     throw error;
   }
@@ -142,10 +152,11 @@ async function staleWhileRevalidate(request) {
   const cachedResponse = await caches.match(request);
   
   const fetchPromise = fetch(request)
-    .then((networkResponse) => {
-      if (networkResponse.ok) {
-        const cache = caches.open(DYNAMIC_CACHE);
-        cache.then(c => c.put(request, networkResponse.clone()));
+    .then(async (networkResponse) => {
+      if (networkResponse.ok && request.method === 'GET') {
+        const cache = await caches.open(DYNAMIC_CACHE);
+        // レスポンスをクローンしてからキャッシュに保存
+        await cache.put(request.clone(), networkResponse.clone());
       }
       return networkResponse;
     })
