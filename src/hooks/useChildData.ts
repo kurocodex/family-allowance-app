@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Task, TaskCompletion, PointTransaction, User } from '../types';
+import { Task, TaskCompletion, User } from '../types';
 import { database } from '../utils/database';
 
 interface UseChildDataReturn {

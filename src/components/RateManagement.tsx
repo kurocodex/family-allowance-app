@@ -488,7 +488,7 @@ const getConditionsForType = (formData: any) => {
 const CreateRateModal: React.FC<CreateRateModalProps> = ({ onClose, onSave }) => {
   const [formData, setFormData] = useState({
     name: '',
-    type: 'AGE_BASED' as const,
+    type: 'AGE_BASED' as 'AGE_BASED' | 'PERIOD_BASED' | 'PERFORMANCE_BASED',
     description: '',
     multiplier: 1.0,
     bonusPoints: 0,

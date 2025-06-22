@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Task, TaskCompletion, PointTransaction, EventResult } from '../types';
+import { User } from '../types';
 import { storage } from '../utils/storage';
 import { useAuth } from '../hooks/useAuth';
 import { calculateAge } from '../utils/dateUtils';
@@ -23,7 +23,7 @@ interface StatisticsProps {
 }
 
 const Statistics: React.FC<StatisticsProps> = ({ children }) => {
-  const { user } = useAuth();
+  const { } = useAuth();
   const [selectedChild, setSelectedChild] = useState<string>('');
   const [statistics, setStatistics] = useState<StatisticsData | null>(null);
   const [timeRange, setTimeRange] = useState<'1month' | '3months' | '6months' | 'all'>('3months');
@@ -44,7 +44,7 @@ const Statistics: React.FC<StatisticsProps> = ({ children }) => {
     const tasks = storage.getTasks();
     const completions = storage.getTaskCompletions().filter(c => c.childId === childId);
     const transactions = storage.getPointTransactions().filter(t => t.userId === childId);
-    const eventResults = storage.getEventResults().filter(r => r.childId === childId);
+    // Event results would be used for additional metrics
 
     // Time range filtering
     const now = new Date();
@@ -124,15 +124,7 @@ const Statistics: React.FC<StatisticsProps> = ({ children }) => {
     setStatistics(stats);
   };
 
-  const getChildName = (childId: string) => {
-    const child = children.find(c => c.id === childId);
-    return child?.name || '不明';
-  };
-
-  const getChildAge = (childId: string) => {
-    const child = children.find(c => c.id === childId);
-    return child?.birthDate ? calculateAge(child.birthDate) : child?.age || 0;
-  };
+  // Helper functions would be used for detailed child analytics
 
   if (children.length === 0) {
     return (

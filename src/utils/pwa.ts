@@ -90,11 +90,8 @@ export const subscribeToPushNotifications = async (): Promise<PushSubscription |
 
 export const checkPWAInstallPrompt = (): Promise<boolean> => {
   return new Promise((resolve) => {
-    let deferredPrompt: any;
-    
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
-      deferredPrompt = e;
       resolve(true);
     });
     
@@ -159,17 +156,7 @@ export const showUpdateAvailableNotification = (): void => {
       body: 'タップしてページを再読み込みし、最新バージョンを取得してください',
       icon: '/pwa-192x192.png',
       badge: '/pwa-64x64.png',
-      requireInteraction: true,
-      actions: [
-        {
-          action: 'reload',
-          title: '今すぐ更新'
-        },
-        {
-          action: 'dismiss',
-          title: '後で'
-        }
-      ]
+      requireInteraction: true
     });
     
     notification.onclick = () => {

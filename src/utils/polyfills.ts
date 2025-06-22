@@ -192,7 +192,7 @@ if (!Array.prototype.includes) {
     const len = parseInt(O.length) || 0;
     if (len === 0) return false;
     
-    const n = parseInt(fromIndex) || 0;
+    const n = parseInt(fromIndex?.toString() || '0') || 0;
     let k = n >= 0 ? n : Math.max(len + n, 0);
     
     while (k < len) {
@@ -380,6 +380,10 @@ export interface BrowserFeatures {
   pushNotifications: boolean;
   webRTC: boolean;
   mediaDevices: boolean;
+  promises: boolean;
+  fetch: boolean;
+  es6Classes: boolean;
+  arrow: boolean;
 }
 
 export const detectFeatures = (): BrowserFeatures => {
@@ -398,7 +402,11 @@ export const detectFeatures = (): BrowserFeatures => {
     serviceWorker: false,
     pushNotifications: false,
     webRTC: false,
-    mediaDevices: false
+    mediaDevices: false,
+    promises: !!window.Promise,
+    fetch: !!window.fetch,
+    es6Classes: true,
+    arrow: true
   };
 
   // CSS Feature Detection

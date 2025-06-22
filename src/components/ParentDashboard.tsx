@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense } from 'react';
-import { Task, TaskCompletion, PointTransaction, User } from '../types';
+import { Task, TaskCompletion, User } from '../types';
 import { database } from '../utils/database';
 import { useAuth } from '../hooks/useAuth';
 import { calculateAge } from '../utils/dateUtils';

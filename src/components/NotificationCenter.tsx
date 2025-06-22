@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNotifications } from '../hooks/useNotifications';
-import { Bell, X, CheckCircle, AlertCircle, Gift, Target, Settings } from 'lucide-react';
+import { Bell, X, CheckCircle, AlertCircle, Gift, Target } from 'lucide-react';
 
 const NotificationCenter: React.FC = () => {
   const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotifications } = useNotifications();

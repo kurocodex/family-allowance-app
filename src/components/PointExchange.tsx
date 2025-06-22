@@ -22,7 +22,7 @@ interface PointExchangeProps {
 }
 
 const PointExchange: React.FC<PointExchangeProps> = ({ children }) => {
-  const { user } = useAuth();
+  const { } = useAuth();
   const [selectedChildId, setSelectedChildId] = useState<string>('');
   const [exchangeAmount, setExchangeAmount] = useState<number>(100);
   const [exchangeRate] = useState<ExchangeRate>({
@@ -112,10 +112,7 @@ const PointExchange: React.FC<PointExchangeProps> = ({ children }) => {
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   };
 
-  const getChildName = (childId: string) => {
-    const child = children.find(c => c.id === childId);
-    return child?.name || '不明';
-  };
+  // Helper function would be used for child name display
 
   const selectedBalance = pointBalances[selectedChildId];
   const exchangeYenAmount = Math.floor(exchangeAmount / exchangeRate.pointsPerYen);

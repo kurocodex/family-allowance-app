@@ -1,5 +1,5 @@
 import React, { useState, Suspense } from 'react';
-import { Task, TaskCompletion, Event } from '../types';
+import { Task, TaskCompletion } from '../types';
 import { database } from '../utils/database';
 import { useAuth } from '../hooks/useAuth';
 import { useChildData } from '../hooks/useChildData';
@@ -31,7 +31,7 @@ const ChildDashboard: React.FC = () => {
       setSelectedTask(null);
     } catch (err) {
       console.error('タスク提出エラー:', err);
-      setError('タスクの提出に失敗しました');
+      // Error handling - could show toast or alert here
     }
   };
 
@@ -155,7 +155,7 @@ const ChildDashboard: React.FC = () => {
       {/* タブ内容 */}
       {currentTab === 'events' ? (
         <Suspense fallback={<div className="text-center py-8">イベントを読み込み中...</div>}>
-          <EventManagement />
+          <EventManagement children={[]} />
         </Suspense>
       ) : currentTab === 'stats' ? (
         <ChildStatsView 

@@ -3,7 +3,7 @@ import { Event, EventResult, User } from '../types';
 import { storage } from '../utils/storage';
 import { useAuth } from '../hooks/useAuth';
 import { calculateAge } from '../utils/dateUtils';
-import { Calendar, Trophy, Plus, Star, Clock, CheckCircle } from 'lucide-react';
+import { Calendar, Trophy, Plus, Star, CheckCircle } from 'lucide-react';
 
 interface EventManagementProps {
   children: User[];

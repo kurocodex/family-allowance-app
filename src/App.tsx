@@ -9,10 +9,9 @@ import {
   registerServiceWorker, 
   requestNotificationPermission, 
   setupOfflineDetection,
-  setupPerformanceMonitoring,
-  checkBrowserCompatibility 
+  setupPerformanceMonitoring
 } from './utils/pwa';
-import { cacheManager } from './utils/cacheInvalidation';
+import './utils/cacheInvalidation';
 
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();

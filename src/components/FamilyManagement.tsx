@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User } from '../types';
 import { supabase } from '../utils/supabase';
 import { useAuth } from '../hooks/useAuth';
-import { UserPlus, Users, Mail, Key, Trash2, Crown, User as UserIcon } from 'lucide-react';
+import { UserPlus, Users, Trash2, Crown, User as UserIcon } from 'lucide-react';
 
 interface FamilyManagementProps {
   onDataUpdate?: () => void;
@@ -13,7 +13,6 @@ const FamilyManagement: React.FC<FamilyManagementProps> = ({ onDataUpdate }) => 
   const [familyMembers, setFamilyMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [inviteCode, setInviteCode] = useState('');
 
   useEffect(() => {
     // 家族管理タブが選択されたときのみ読み込み
@@ -66,9 +65,8 @@ const FamilyManagement: React.FC<FamilyManagementProps> = ({ onDataUpdate }) => 
   };
 
   const generateInviteCode = () => {
-    // 簡単な招待コード生成（実際の実装では、データベースに保存）
-    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-    setInviteCode(code);
+    // 招待コード生成機能（実装予定）
+    console.log('Invite code generation would be implemented here');
   };
 
   const handleCreateChildAccount = async (childData: {
