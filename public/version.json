@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0-b34bfa44",
+  "buildTime": 1750550669404,
+  "buildDate": "2025-06-22T00:04:29.404Z",
+  "assets": [
+    "ChildDashboard-8a0a01fd.js",
+    "EventManagement-cc381487.js",
+    "FamilyManagement-500aeb2b.js",
+    "ParentDashboard-3b4b175a.js",
+    "PointExchange-3f4b235c.js",
+    "RateManagement-92b06a2e.js",
+    "Statistics-ca53eca9.js",
+    "database-b3323266.js",
+    "dateUtils-d91f8443.js",
+    "forms-ea52db82.js",
+    "icons-61d3c260.js",
+    "index-221da6ed.css",
+    "index-ff9f3680.js",
+    "routing-3469486c.js",
+    "storage-afc0bc2e.js",
+    "supabase-c91fe37d.js",
+    "vendor-18e24f2a.js"
+  ],
+  "commitHash": "development"
+}

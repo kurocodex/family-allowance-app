@@ -1,47 +1,183 @@
-// Service Worker for PWA functionality - CSP準拠
-const CACHE_NAME = 'family-app-v3';
-const urlsToCache = [
+// Service Worker for PWA functionality - Enhanced version with automatic cache busting
+const APP_VERSION = self.location.search.slice(1) || Date.now().toString();
+const CACHE_NAME = `family-app-v${APP_VERSION}`;
+const STATIC_CACHE = `static-${APP_VERSION}`;
+const DYNAMIC_CACHE = `dynamic-${APP_VERSION}`;
+
+// キャッシュするリソースのパターン
+const STATIC_URLS = [
   '/',
   '/manifest.json'
-  // Viteビルド用: /assets/ 配下のファイルは動的キャッシュで対応
-  // 静的パスでのキャッシュは404エラーの原因になるため除外
 ];
 
-// Install event
+// ネットワーク優先で取得するリソース（常に最新が必要）
+const NETWORK_FIRST_PATTERNS = [
+  /\/api\//,
+  /supabase\.co/,
+  /\.json$/
+];
+
+// キャッシュ優先で取得するリソース（静的アセット）
+const CACHE_FIRST_PATTERNS = [
+  /\/assets\/.*\.(js|css|png|jpg|jpeg|svg|woff|woff2)$/,
+  /\.(png|jpg|jpeg|svg|gif|webp|ico)$/,
+  /\.(woff|woff2|eot|ttf)$/
+];
+
+// Install event - 重要な静的リソースを事前キャッシュ
 self.addEventListener('install', (event) => {
+  console.log('[SW] Installing version:', APP_VERSION);
   event.waitUntil(
-    caches.open(CACHE_NAME)
+    caches.open(STATIC_CACHE)
       .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
+        console.log('[SW] Pre-caching static resources');
+        return cache.addAll(STATIC_URLS.map(url => {
+          // キャッシュバスティングのためのタイムスタンプ付与
+          return new Request(url, { cache: 'no-cache' });
+        }));
+      })
+      .then(() => {
+        // 新しいサービスワーカーを即座にアクティブ化
+        return self.skipWaiting();
+      })
+      .catch((error) => {
+        console.error('[SW] Pre-caching failed:', error);
       })
   );
 });
 
-// Fetch event
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
-      })
-  );
-});
-
-// Activate event
+// Activate event - 古いキャッシュを削除
 self.addEventListener('activate', (event) => {
+  console.log('[SW] Activating version:', APP_VERSION);
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    Promise.all([
+      // すべてのクライアントで新しいサービスワーカーを有効化
+      self.clients.claim(),
+      // 古いキャッシュを削除
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (!cacheName.includes(APP_VERSION)) {
+              console.log('[SW] Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      })
+    ])
   );
+});
+
+// Fetch event - 高度なキャッシュ戦略
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // 外部ドメインの場合はスキップ
+  if (url.origin !== self.location.origin && !url.origin.includes('supabase.co')) {
+    return;
+  }
+
+  // ネットワーク優先戦略（API、動的データ）
+  if (NETWORK_FIRST_PATTERNS.some(pattern => pattern.test(request.url))) {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  // キャッシュ優先戦略（静的アセット）
+  if (CACHE_FIRST_PATTERNS.some(pattern => pattern.test(request.url))) {
+    event.respondWith(cacheFirst(request));
+    return;
+  }
+
+  // デフォルト: ステイル・ワイル・リバリデート戦略
+  event.respondWith(staleWhileRevalidate(request));
+});
+
+// ネットワーク優先戦略
+async function networkFirst(request) {
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse.ok) {
+      const cache = await caches.open(DYNAMIC_CACHE);
+      cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch (error) {
+    console.log('[SW] Network failed, trying cache:', request.url);
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    // オフライン時のフォールバック
+    if (request.destination === 'document') {
+      return caches.match('/');
+    }
+    throw error;
+  }
+}
+
+// キャッシュ優先戦略
+async function cacheFirst(request) {
+  const cachedResponse = await caches.match(request);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+  
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse.ok) {
+      const cache = await caches.open(STATIC_CACHE);
+      cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch (error) {
+    console.error('[SW] Cache and network both failed:', request.url, error);
+    throw error;
+  }
+}
+
+// ステイル・ワイル・リバリデート戦略
+async function staleWhileRevalidate(request) {
+  const cachedResponse = await caches.match(request);
+  
+  const fetchPromise = fetch(request)
+    .then((networkResponse) => {
+      if (networkResponse.ok) {
+        const cache = caches.open(DYNAMIC_CACHE);
+        cache.then(c => c.put(request, networkResponse.clone()));
+      }
+      return networkResponse;
+    })
+    .catch((error) => {
+      console.log('[SW] Network request failed:', request.url, error);
+      return cachedResponse;
+    });
+
+  return cachedResponse || fetchPromise;
+}
+
+// キャッシュサイズ制限
+async function limitCacheSize(cacheName, maxItems) {
+  const cache = await caches.open(cacheName);
+  const keys = await cache.keys();
+  if (keys.length > maxItems) {
+    // 古いエントリから削除
+    const itemsToDelete = keys.slice(0, keys.length - maxItems);
+    await Promise.all(itemsToDelete.map(key => cache.delete(key)));
+  }
+}
+
+// 定期的なキャッシュクリーンアップ
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'CLEANUP_CACHE') {
+    event.waitUntil(
+      Promise.all([
+        limitCacheSize(DYNAMIC_CACHE, 50),
+        limitCacheSize(STATIC_CACHE, 30)
+      ])
+    );
+  }
 });
 
 // Push notification handling

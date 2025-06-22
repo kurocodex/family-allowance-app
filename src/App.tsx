@@ -5,7 +5,14 @@ import AuthPage from './components/AuthPage';
 import Dashboard from './components/Dashboard';
 import ErrorBoundary from './components/ErrorBoundary';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
-import { registerServiceWorker, requestNotificationPermission } from './utils/pwa';
+import { 
+  registerServiceWorker, 
+  requestNotificationPermission, 
+  setupOfflineDetection,
+  setupPerformanceMonitoring,
+  checkBrowserCompatibility 
+} from './utils/pwa';
+import { cacheManager } from './utils/cacheInvalidation';
 
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
@@ -13,6 +20,24 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     // Register service worker for PWA functionality
     registerServiceWorker();
+    
+    // Setup offline detection
+    setupOfflineDetection(
+      () => {
+        console.log('[App] Application is back online');
+        // Optionally show a "back online" notification
+      },
+      () => {
+        console.log('[App] Application is offline');
+        // Optionally show an "offline" notification
+      }
+    );
+    
+    // Setup performance monitoring
+    setupPerformanceMonitoring();
+    
+    // Initialize cache management system
+    // Cache management is automatically initialized when imported
     
     // Request notification permission when user logs in
     if (user) {

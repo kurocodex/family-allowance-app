@@ -4,9 +4,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/generate-version.js && vite build && node scripts/generate-version.js",
+    "build:deploy": "node scripts/deploy-with-cache-bust.js",
     "preview": "vite preview",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "cache:clear": "node -e \"require('./scripts/deploy-with-cache-bust.js').main()\"",
+    "deploy": "npm run build:deploy && vercel --prod"
   },
   "dependencies": {
     "@supabase/auth-ui-react": "^0.4.7",
