@@ -34,6 +34,49 @@
     /* iOS ボタンスタイルのリセット */
     -webkit-appearance: none;
     border-radius: 0;
+    /* モバイルアプリライクなタップ効果 */
+    transition: transform 0.1s ease, opacity 0.1s ease;
+  }
+  
+  button:active {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+  
+  /* モバイルアプリ風タブバー */
+  .mobile-tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+    z-index: 1000;
+  }
+  
+  .mobile-tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px 12px;
+    text-decoration: none;
+    color: #8e8e93;
+    font-size: 10px;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+  
+  .mobile-tab-item.active {
+    color: #007aff;
+  }
+  
+  .mobile-tab-icon {
+    font-size: 24px;
+    margin-bottom: 2px;
   }
 }
 

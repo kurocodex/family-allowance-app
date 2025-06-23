@@ -1,7 +1,7 @@
 {
   "name": "家族お小遣い管理アプリ",
-  "short_name": "FamilyApp",
-  "description": "家族向けのお小遣い管理とタスク管理アプリ",
+  "short_name": "おこづかい",
+  "description": "家族でお小遣いとタスクを管理するモバイルアプリ",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -11,6 +11,22 @@
   "scope": "/",
   "lang": "ja",
   "categories": ["lifestyle", "education", "family"],
+  "shortcuts": [
+    {
+      "name": "子ども画面",
+      "short_name": "子ども",
+      "description": "タスクを確認して提出",
+      "url": "/?mode=child",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "親画面", 
+      "short_name": "管理",
+      "description": "タスク管理と承認",
+      "url": "/?mode=parent",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    }
+  ],
   "icons": [
     {
       "src": "/pwa-64x64.png",

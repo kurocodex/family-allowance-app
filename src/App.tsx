@@ -12,6 +12,7 @@ import {
   setupPerformanceMonitoring
 } from './utils/pwa';
 import { optimizeForIOS } from './utils/iosSupport';
+import { initializeMobileEnhancements } from './utils/mobileEnhancements';
 import './utils/cacheInvalidation';
 
 const AppContent: React.FC = () => {
@@ -38,6 +39,9 @@ const AppContent: React.FC = () => {
     
     // iOS 最適化
     optimizeForIOS();
+    
+    // モバイルアプリ拡張機能
+    initializeMobileEnhancements();
     
     // Initialize cache management system
     // Cache management is automatically initialized when imported
