@@ -6,6 +6,35 @@
   body {
     @apply font-sans bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 min-h-screen;
   }
+  
+  /* iOS Safari最適化 */
+  html, body {
+    /* iOS Safari 100vh問題の解決 */
+    height: 100%;
+    height: calc(var(--vh, 1vh) * 100);
+    /* iOS Safari スクロールの最適化 */
+    -webkit-overflow-scrolling: touch;
+    /* iOS タップハイライトの無効化 */
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* iOS 入力フィールドの最適化 */
+  input, textarea, select {
+    /* iOS フォーカス時のズーム防止 */
+    font-size: 16px;
+    /* iOS 影の除去 */
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+  
+  /* iOS ボタンの最適化 */
+  button {
+    /* iOS タップ領域の拡張 */
+    min-height: 44px;
+    /* iOS ボタンスタイルのリセット */
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
 }
 
 @layer components {

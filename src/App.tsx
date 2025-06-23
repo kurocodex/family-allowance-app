@@ -11,6 +11,7 @@ import {
   setupOfflineDetection,
   setupPerformanceMonitoring
 } from './utils/pwa';
+import { optimizeForIOS } from './utils/iosSupport';
 import './utils/cacheInvalidation';
 
 const AppContent: React.FC = () => {
@@ -34,6 +35,9 @@ const AppContent: React.FC = () => {
     
     // Setup performance monitoring
     setupPerformanceMonitoring();
+    
+    // iOS 最適化
+    optimizeForIOS();
     
     // Initialize cache management system
     // Cache management is automatically initialized when imported
