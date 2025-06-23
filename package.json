@@ -9,7 +9,15 @@
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
     "cache:clear": "node -e \"require('./scripts/deploy-with-cache-bust.js').main()\"",
-    "deploy": "npm run build:deploy && vercel --prod"
+    "deploy": "npm run build:deploy && vercel --prod",
+    "cap:init": "npx cap init",
+    "cap:add:ios": "npx cap add ios",
+    "cap:add:android": "npx cap add android", 
+    "cap:copy": "npm run build && npx cap copy",
+    "cap:sync": "npm run build && npx cap sync",
+    "cap:open:ios": "npx cap open ios",
+    "cap:open:android": "npx cap open android",
+    "mobile:build": "npm run build && npx cap copy && npx cap sync"
   },
   "dependencies": {
     "@supabase/auth-ui-react": "^0.4.7",
